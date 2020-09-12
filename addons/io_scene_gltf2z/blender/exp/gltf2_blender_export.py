@@ -138,12 +138,12 @@ def __write_file(json, buffer, export_settings):
 
 
 def __notify_start(context):
-    print_console('INFO', 'Starting glTF 2.0 export')
+    print_console('INFO', 'Starting BBBBBBBBBBBBBBBBB glTF 2.0 export')
     context.window_manager.progress_begin(0, 100)
     context.window_manager.progress_update(0)
 
 
 def __notify_end(context, elapsed):
-    print_console('INFO', 'Finished glTF 2.0 export in {} s'.format(elapsed))
+    print_console('INFO', 'Finished BBBBBBBBBBBBBBBBB glTF 2.0 export in {} s'.format(elapsed))
     context.window_manager.progress_end()
     print_newline()
