@@ -35,6 +35,8 @@ def gather_mesh(blender_mesh: bpy.types.Mesh,
     if not skip_filter and not __filter_mesh(blender_mesh, vertex_groups, modifiers, export_settings):
         return None
 
+    print_console("INFO", "gather_mesh")
+
     mesh = gltf2_io.Mesh(
         extensions=__gather_extensions(blender_mesh, vertex_groups, modifiers, export_settings),
         extras=__gather_extras(blender_mesh, vertex_groups, modifiers, export_settings),
@@ -42,6 +44,8 @@ def gather_mesh(blender_mesh: bpy.types.Mesh,
         weights=__gather_weights(blender_mesh, vertex_groups, modifiers, export_settings),
         primitives=__gather_primitives(blender_mesh, blender_object, vertex_groups, modifiers, material_names, export_settings),
     )
+
+    print_console("INFO", "mesh: " + str(mesh))
 
     if len(mesh.primitives) == 0:
         print_console("WARNING", "Mesh '{}' has no primitives and will be omitted.".format(mesh.name))
@@ -87,8 +91,12 @@ def __gather_extras(blender_mesh: bpy.types.Mesh,
 
     extras = {}
 
-    if export_settings['gltf_extras']:
-        extras = generate_extras(blender_mesh) or {}
+    print_console("INFO", "__gather_extras" + str(export_settings['gltf_extras']))
+
+    # if export_settings['gltf_extras']:
+    extras = generate_extras(blender_mesh) or {}
+
+    print_console("INFO", "gathered extras: " + str(extras))
 
     if export_settings[MORPH] and blender_mesh.shape_keys:
         morph_max = len(blender_mesh.shape_keys.key_blocks) - 1
@@ -101,8 +109,10 @@ def __gather_extras(blender_mesh: bpy.types.Mesh,
             extras['targetNames'] = target_names
 
     if extras:
+        print_console("INFO", "returning extras")
         return extras
 
+    print_console("INFO", "returning none extras")
     return None
 
 

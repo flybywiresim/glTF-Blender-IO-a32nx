@@ -49,6 +49,8 @@ def gather_primitives(
     blender_primitives = __gather_cache_primitives(blender_mesh, blender_object,
         vertex_groups, modifiers, export_settings)
 
+    l = 0
+
     for internal_primitive in blender_primitives:
         material_idx = internal_primitive['material']
         double_sided = False
@@ -68,14 +70,24 @@ def gather_primitives(
             # no material at that index
             pass
 
+        print_console('INFO', 'internal_primitive: ' + str(internal_primitive))
+        print_console('INFO', 'internal_primitive indices: ' + str(internal_primitive['indices'].count))
+        extras = {}
+        extras['ASOBO_primitive'] = {}
+        extras['ASOBO_primitive']['PrimitiveCount'] = internal_primitive['indices'].count / 3
+        extras['ASOBO_primitive']['VertexType'] = 'VTX'
+        extras['ASOBO_primitive']['VertexVersion'] = 2
+        if l > 0:
+            extras['ASOBO_primitive']['StartIndex'] = l
+        l += internal_primitive['indices'].count
 
         primitive = gltf2_io.MeshPrimitive(
             attributes=internal_primitive['attributes'],
             extensions=None,
-            extras=None,
+            extras=extras,
             indices=internal_primitive['indices'],
             material=material,
-            mode=None,
+            mode=4,
             targets=internal_primitive['targets']
         )
         primitives.append(primitive)
