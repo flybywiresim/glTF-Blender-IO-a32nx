@@ -49,7 +49,11 @@ class glTFImporter():
             'KHR_materials_pbrSpecularGlossiness',
             'KHR_lights_punctual',
             'KHR_materials_unlit',
-            'KHR_texture_transform'
+            'KHR_texture_transform',
+            # Adding this so importer won't fail at the check function
+            # but I haven't actually implemented this extension yet
+            # so I have other code that makes it skip loading the textures for now
+            'MSFT_texture_dds'
         ]
 
         # TODO : merge with io_constants

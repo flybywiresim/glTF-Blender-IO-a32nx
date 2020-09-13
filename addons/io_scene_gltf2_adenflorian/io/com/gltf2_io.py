@@ -1117,7 +1117,9 @@ class Texture:
         extras = obj.get("extras")
         name = from_union([from_str, from_none], obj.get("name"))
         sampler = from_union([from_int, from_none], obj.get("sampler"))
-        source = from_int(obj.get("source"))
+        # The msfs gltf texture object don't have a root source prop
+        # I have code in here that prevents textures from loading for now
+        source = from_union([from_int, from_none], obj.get("source"))
         return Texture(extensions, extras, name, sampler, source)
 
     def to_dict(self):

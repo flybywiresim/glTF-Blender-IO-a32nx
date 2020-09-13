@@ -115,7 +115,9 @@ class BlenderPrimitive():
             normals = BinaryData.get_data_from_accessor(gltf, attributes['NORMAL'], cache=True)
 
             for bidx, pidx in vert_idxs:
-                bme_verts[bidx].normal = normals[pidx]
+                # msfs gltf uses VEC4 for the vertex normals, but blender uses VEC3
+                # TODO Figure out what to do with the 4th component
+                bme_verts[bidx].normal = normals[pidx][0:3]
 
         # Set vertex colors. Add them in the order COLOR_0, COLOR_1, etc.
         set_num = 0

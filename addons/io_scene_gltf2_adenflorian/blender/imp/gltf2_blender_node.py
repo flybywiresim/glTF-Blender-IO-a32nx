@@ -39,8 +39,13 @@ class BlenderNode():
         if bpy.app.debug_value == 101:
             gltf.log.critical("Node " + str(gltf.display_current_node) + " of " + str(gltf.display_total_nodes) + " (idx " + str(node_idx) + ")")
 
-        if pynode.mesh is not None:
+        # The original code was either a bug or msfs gltf breaking standards
+        # The original code broke when you had a node that had both a mesh and was a joint
+        # If it was a mesh, it would return early and not setup the is joint stuff
+        flag = False
 
+        if pynode.mesh is not None:
+            flag = True
             instance = False
             if gltf.data.meshes[pynode.mesh].blender_name is not None:
                 # Mesh is already created, only create instance
@@ -97,13 +102,8 @@ class BlenderNode():
             if instance == False:
                 BlenderMesh.set_mesh(gltf, gltf.data.meshes[pynode.mesh], mesh, obj)
 
-            if pynode.children:
-                for child_idx in pynode.children:
-                    BlenderNode.create(gltf, child_idx, node_idx)
-
-            return
-
         if pynode.camera is not None:
+            flag = True
             if pynode.name:
                 gltf.log.info("Blender create Camera node " + pynode.name)
             else:
@@ -114,13 +114,8 @@ class BlenderNode():
             pynode.blender_object = obj.name
             BlenderNode.set_parent(gltf, obj, parent)
 
-            if pynode.children:
-                for child_idx in pynode.children:
-                    BlenderNode.create(gltf, child_idx, node_idx)
-
-            return
-
         if pynode.is_joint:
+            flag = True
             if pynode.name:
                 gltf.log.info("Blender create Bone node " + pynode.name)
             else:
@@ -131,13 +126,8 @@ class BlenderNode():
 
             BlenderSkin.create_bone(gltf, pynode.skin_id, node_idx, parent)
 
-            if pynode.children:
-                for child_idx in pynode.children:
-                    BlenderNode.create(gltf, child_idx, node_idx)
-
-            return
-
         if pynode.extensions is not None:
+            flag = True
             if 'KHR_lights_punctual' in pynode.extensions.keys():
                 obj = BlenderLight.create(gltf, pynode.extensions['KHR_lights_punctual']['light'])
                 set_extras(obj, pynode.extras)
@@ -147,11 +137,11 @@ class BlenderNode():
                 pynode.correction_needed = True
                 BlenderNode.set_parent(gltf, obj, parent)
 
-                if pynode.children:
-                    for child_idx in pynode.children:
-                        BlenderNode.create(gltf, child_idx, node_idx)
-
-                return
+        if flag:
+            if pynode.children:
+                for child_idx in pynode.children:
+                    BlenderNode.create(gltf, child_idx, node_idx)
+            return
 
         # No mesh, no camera, no light. For now, create empty #TODO
 

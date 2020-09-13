@@ -60,32 +60,35 @@ class BlenderMaterial():
 
         ignore_map = False
 
-        if pymaterial.extensions is not None :
-            if 'KHR_materials_unlit' in pymaterial.extensions.keys():
-                ignore_map = True
-                BlenderKHR_materials_unlit.create(
-                    gltf, material_idx,
-                    pymaterial.extensions['KHR_materials_unlit'],
-                    mat.name,
-                    vertex_color
-                )
-            elif 'KHR_materials_pbrSpecularGlossiness' in pymaterial.extensions.keys():
-                BlenderKHR_materials_pbrSpecularGlossiness.create(
-                    gltf, pymaterial.extensions['KHR_materials_pbrSpecularGlossiness'], mat.name, vertex_color
-                )
-        else:
-            # create pbr material
-            if pymaterial.pbr_metallic_roughness is None:
-                # If no pbr material is set, we need to apply all default of pbr
-                pbr = {}
-                pbr["baseColorFactor"] = [1.0, 1.0, 1.0, 1.0]
-                pbr["metallicFactor"] = 1.0
-                pbr["roughnessFactor"] = 1.0
-                pymaterial.pbr_metallic_roughness = MaterialPBRMetallicRoughness.from_dict(pbr)
-                pymaterial.pbr_metallic_roughness.color_type = gltf.SIMPLE
-                pymaterial.pbr_metallic_roughness.metallic_type = gltf.SIMPLE
+        # The msfs gltf materials have extensions, but not any KHR ones
+        # But they do all have the pbr_metallic_roughness defined
+        # So I opted to jsut use that for all mats for now to just get it imported
+        # if pymaterial.extensions is not None :
+        #     if 'KHR_materials_unlit' in pymaterial.extensions.keys():
+        #         ignore_map = True
+        #         BlenderKHR_materials_unlit.create(
+        #             gltf, material_idx,
+        #             pymaterial.extensions['KHR_materials_unlit'],
+        #             mat.name,
+        #             vertex_color
+        #         )
+        #     elif 'KHR_materials_pbrSpecularGlossiness' in pymaterial.extensions.keys():
+        #         BlenderKHR_materials_pbrSpecularGlossiness.create(
+        #             gltf, pymaterial.extensions['KHR_materials_pbrSpecularGlossiness'], mat.name, vertex_color
+        #         )
+        # else:
+        # create pbr material
+        if pymaterial.pbr_metallic_roughness is None:
+            # If no pbr material is set, we need to apply all default of pbr
+            pbr = {}
+            pbr["baseColorFactor"] = [1.0, 1.0, 1.0, 1.0]
+            pbr["metallicFactor"] = 1.0
+            pbr["roughnessFactor"] = 1.0
+            pymaterial.pbr_metallic_roughness = MaterialPBRMetallicRoughness.from_dict(pbr)
+            pymaterial.pbr_metallic_roughness.color_type = gltf.SIMPLE
+            pymaterial.pbr_metallic_roughness.metallic_type = gltf.SIMPLE
 
-            BlenderPbr.create(gltf, pymaterial.pbr_metallic_roughness, mat.name, vertex_color)
+        BlenderPbr.create(gltf, pymaterial.pbr_metallic_roughness, mat.name, vertex_color)
 
         if ignore_map == False:
             # add emission map if needed
