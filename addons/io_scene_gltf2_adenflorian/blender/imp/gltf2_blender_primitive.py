@@ -38,7 +38,6 @@ class BlenderPrimitive():
 
     @staticmethod
     def add_primitive_to_bmesh(gltf, bme, pymesh, pyprimitive, material_index):
-        print('add_primitive_to_bmesh ' + pymesh.name)
         attributes = pyprimitive.attributes
 
         if 'POSITION' not in attributes:

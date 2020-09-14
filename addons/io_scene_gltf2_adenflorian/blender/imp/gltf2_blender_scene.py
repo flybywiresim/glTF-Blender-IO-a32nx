@@ -104,14 +104,17 @@ class BlenderScene():
         if gltf.data.skins:
             for skin_id, skin in enumerate(gltf.data.skins):
                 if hasattr(skin, "node_ids"):
+                    print('BlenderSkin.create_vertex_groups ' + skin.name)
                     BlenderSkin.create_vertex_groups(gltf, skin_id)
 
             for skin_id, skin in enumerate(gltf.data.skins):
                 if hasattr(skin, "node_ids"):
+                    print('BlenderSkin.create_armature_modifiers ' + skin.name)
                     BlenderSkin.create_armature_modifiers(gltf, skin_id)
 
         if gltf.data.animations:
             for anim_idx, anim in enumerate(gltf.data.animations):
+                print('processing animation ' + anim.name)
                 # Blender armature name -> action all its bones should use
                 gltf.arma_cache = {}
                 # Things we need to stash when we're done.

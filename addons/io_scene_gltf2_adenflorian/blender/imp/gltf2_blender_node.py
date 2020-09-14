@@ -30,6 +30,7 @@ class BlenderNode():
     def create(gltf, node_idx, parent):
         """Node creation."""
         pynode = gltf.data.nodes[node_idx]
+        print('creating blender node ' + pynode.name)
 
         # Blender attributes initialization
         pynode.blender_object = ""
