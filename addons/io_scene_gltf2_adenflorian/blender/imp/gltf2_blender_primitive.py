@@ -38,6 +38,7 @@ class BlenderPrimitive():
 
     @staticmethod
     def add_primitive_to_bmesh(gltf, bme, pymesh, pyprimitive, material_index):
+        print('add_primitive_to_bmesh ' + pymesh.name)
         attributes = pyprimitive.attributes
 
         if 'POSITION' not in attributes:
@@ -56,6 +57,18 @@ class BlenderPrimitive():
         bme_verts = bme.verts
         bme_edges = bme.edges
         bme_faces = bme.faces
+
+        base_vertex_index = pyprimitive.extras.get('ASOBO_primitive').get('BaseVertexIndex')
+        tri_count = pyprimitive.extras.get('ASOBO_primitive').get('PrimitiveCount')
+        start_index = pyprimitive.extras.get('ASOBO_primitive').get('StartIndex')
+
+        if base_vertex_index is None:
+            base_vertex_index = 0
+
+        if start_index is None:
+            start_index = 0
+        
+        indices = list(map(lambda x: x + base_vertex_index, indices[start_index:(start_index + (tri_count * 3))]))
 
         # Every vertex has an index into the primitive's attribute arrays and a
         #  *different* index into the BMesh's list of verts. Call the first one the
