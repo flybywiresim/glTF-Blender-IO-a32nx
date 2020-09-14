@@ -13,16 +13,16 @@
 # limitations under the License.
 
 bl_info = {
-    'name': 'glTF 2.0 format',
-    'author': 'Julien Duroure, Norbert Nopper, Urs Hanselmann, Moritz Becher, Benjamin Schmithüsen, Jim Eckerlein, and many external contributors',
+    'name': 'glTF 2.0 format a32nx',
+    'author': 'David "AdenFlorian" Valachovic, Julien Duroure, Norbert Nopper, Urs Hanselmann, Moritz Becher, Benjamin Schmithüsen, Jim Eckerlein, and many external contributors',
     "version": (1, 1, 46),
     'blender': (2, 81, 6),
     'location': 'File > Import-Export',
-    'description': 'Import-Export as glTF 2.0',
+    'description': 'Import-Export as glTF 2.0 a32nx',
     'warning': '',
     'wiki_url': "https://docs.blender.org/manual/en/2.82/addons/import_export/io_scene_gltf2.html",
     'tracker_url': "https://github.com/KhronosGroup/glTF-Blender-IO/issues/",
-    'support': 'OFFICIAL',
+    'support': 'COMMUNITY',
     'category': 'Import-Export',
 }
 
@@ -880,13 +880,13 @@ class ExportGLTF2(bpy.types.Operator, ExportGLTF2_Base, ExportHelper):
 
 
 def menu_func_export(self, context):
-    self.layout.operator(ExportGLTF2.bl_idname, text='glTF 2.0 (.glb/.gltf)')
+    self.layout.operator(ExportGLTF2.bl_idname, text='glTF 2.0 (.glb/.gltf) a32nx')
 
 
 class ImportGLTF2(Operator, ImportHelper):
     """Load a glTF 2.0 file"""
-    bl_idname = 'import_scene.gltf'
-    bl_label = 'Import glTF 2.0'
+    bl_idname = 'import_scene.gltfa32nx'
+    bl_label = 'Import glTF 2.0 a32nx'
 
     filter_glob = StringProperty(default="*.glb;*.gltf", options={'HIDDEN'})
 
