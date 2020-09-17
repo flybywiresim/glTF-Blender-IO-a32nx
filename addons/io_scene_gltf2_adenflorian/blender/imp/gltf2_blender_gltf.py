@@ -254,6 +254,7 @@ class BlenderGlTF():
         # joint management
         for node_idx, node in enumerate(gltf.data.nodes):
             is_joint, skin_idx = gltf.is_node_joint(node_idx)
+            node.is_skeleton = False
             if is_joint:
                 node.is_joint = True
                 node.skin_id = skin_idx
@@ -264,6 +265,7 @@ class BlenderGlTF():
             for skin_id, skin in enumerate(gltf.data.skins):
                 # init blender values
                 skin.blender_armature_name = None
+                gltf.data.nodes[skin.skeleton].is_skeleton = True
                 # if skin.skeleton and skin.skeleton not in skin.joints:
                 #     gltf.data.nodes[skin.skeleton].is_joint = True
                 #     gltf.data.nodes[skin.skeleton].skin_id  = skin_id

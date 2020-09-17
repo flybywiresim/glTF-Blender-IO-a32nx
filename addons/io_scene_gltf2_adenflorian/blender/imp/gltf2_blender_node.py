@@ -45,6 +45,18 @@ class BlenderNode():
         # If it was a mesh, it would return early and not setup the is joint stuff
         flag = False
 
+        if pynode.is_joint:
+            flag = True
+            if pynode.name:
+                gltf.log.info("Blender create Bone node " + pynode.name)
+            else:
+                gltf.log.info("Blender create Bone node")
+            # Check if corresponding armature is already created, create it if needed
+            if gltf.data.skins[pynode.skin_id].blender_armature_name is None:
+                BlenderSkin.create_armature(gltf, pynode.skin_id, parent)
+
+            BlenderSkin.create_bone(gltf, pynode.skin_id, node_idx, parent)
+
         if pynode.mesh is not None:
             flag = True
             instance = False
@@ -95,8 +107,14 @@ class BlenderNode():
 
             # Transforms apply only if this mesh is not skinned
             # See implementation node of gltf2 specification
-            if not (pynode.mesh is not None and pynode.skin is not None):
-                BlenderNode.set_transforms(gltf, node_idx, pynode, obj, parent)
+            # if not (pynode.mesh is not None and pynode.skin is not None):
+                # if not pynode.is_joint:
+                # if pynode.is_skeleton is not True:
+            BlenderNode.set_transforms(gltf, node_idx, pynode, obj, parent)
+                # else:
+                #     print('not setting transforms for skeleton ' + pynode.name)
+                # else:
+                #     print('not setting transforms for joint ' + pynode.name)
             pynode.blender_object = obj.name
             BlenderNode.set_parent(gltf, obj, parent)
 
@@ -114,29 +132,6 @@ class BlenderNode():
             BlenderNode.set_transforms(gltf, node_idx, pynode, obj, parent)  # TODO default rotation of cameras ?
             pynode.blender_object = obj.name
             BlenderNode.set_parent(gltf, obj, parent)
-
-        if pynode.is_joint:
-            flag = True
-            if pynode.name:
-                gltf.log.info("Blender create Bone node " + pynode.name)
-            else:
-                gltf.log.info("Blender create Bone node")
-            # Check if corresponding armature is already created, create it if needed
-            if gltf.data.skins[pynode.skin_id].blender_armature_name is None:
-                BlenderSkin.create_armature(gltf, pynode.skin_id, parent)
-
-            BlenderSkin.create_bone(gltf, pynode.skin_id, node_idx, parent)
-
-        if pynode.extensions is not None:
-            flag = True
-            if 'KHR_lights_punctual' in pynode.extensions.keys():
-                obj = BlenderLight.create(gltf, pynode.extensions['KHR_lights_punctual']['light'])
-                set_extras(obj, pynode.extras)
-                obj.rotation_mode = 'QUATERNION'
-                BlenderNode.set_transforms(gltf, node_idx, pynode, obj, parent, correction=True)
-                pynode.blender_object = obj.name
-                pynode.correction_needed = True
-                BlenderNode.set_parent(gltf, obj, parent)
 
         if flag:
             if pynode.children:
@@ -178,57 +173,6 @@ class BlenderNode():
 
         for node_idx, node in enumerate(gltf.data.nodes):
             if node_idx == parent:
-                if node.is_joint is True:
-                    bpy.ops.object.select_all(action='DESELECT')
-                    if bpy.app.version < (2, 80, 0):
-                        bpy.data.objects[node.blender_armature_name].select = True
-                        bpy.context.scene.objects.active = bpy.data.objects[node.blender_armature_name]
-                    else:
-                        bpy.data.objects[node.blender_armature_name].select_set(True)
-                        bpy.context.view_layer.objects.active = bpy.data.objects[node.blender_armature_name]
-
-                    bpy.ops.object.mode_set(mode='EDIT')
-                    bpy.data.objects[node.blender_armature_name].data.edit_bones.active = \
-                        bpy.data.objects[node.blender_armature_name].data.edit_bones[node.blender_bone_name]
-                    bpy.ops.object.mode_set(mode='OBJECT')
-                    bpy.ops.object.select_all(action='DESELECT')
-                    if bpy.app.version < (2, 80, 0):
-                        obj.select = True
-                        bpy.data.objects[node.blender_armature_name].select = True
-                        bpy.context.scene.objects.active = bpy.data.objects[node.blender_armature_name]
-                        bpy.context.scene.update()
-                    else:
-                        obj.select_set(True)
-                        bpy.data.objects[node.blender_armature_name].select_set(True)
-                        bpy.context.view_layer.objects.active = bpy.data.objects[node.blender_armature_name]
-                        bpy.context.view_layer.update()
-                    bpy.ops.object.parent_set(type='BONE_RELATIVE', keep_transform=True)
-                    # From world transform to local (-armature transform -bone transform)
-                    bone_trans = bpy.data.objects[node.blender_armature_name] \
-                        .pose.bones[node.blender_bone_name].matrix.to_translation().copy()
-                    bone_rot = bpy.data.objects[node.blender_armature_name] \
-                        .pose.bones[node.blender_bone_name].matrix.to_quaternion().copy()
-                    bone_scale_mat = scale_to_matrix(node.blender_bone_matrix.to_scale())
-                    if bpy.app.version < (2, 80, 0):
-                        obj.location = bone_scale_mat * obj.location
-                        obj.location = bone_rot * obj.location
-                        obj.location += bone_trans
-                        obj.location = bpy.data.objects[node.blender_armature_name].matrix_world.to_quaternion() \
-                            * obj.location
-                        obj.rotation_quaternion = obj.rotation_quaternion \
-                            * bpy.data.objects[node.blender_armature_name].matrix_world.to_quaternion()
-                        obj.scale = bone_scale_mat * obj.scale
-                    else:
-                        obj.location = bone_scale_mat @ obj.location
-                        obj.location = bone_rot @ obj.location
-                        obj.location += bone_trans
-                        obj.location = bpy.data.objects[node.blender_armature_name].matrix_world.to_quaternion() \
-                            @ obj.location
-                        obj.rotation_quaternion = obj.rotation_quaternion \
-                            @ bpy.data.objects[node.blender_armature_name].matrix_world.to_quaternion()
-                        obj.scale = bone_scale_mat @ obj.scale
-
-                    return
                 if node.blender_object:
                     obj.parent = bpy.data.objects[node.blender_object]
                     return
@@ -236,32 +180,27 @@ class BlenderNode():
         gltf.log.error("ERROR, parent not found")
 
     @staticmethod
-    def set_transforms(gltf, node_idx, pynode, obj, parent, correction=False):
+    def set_transforms(gltf, node_idx, pynode, obj, parent):
         """Set transforms."""
-        if parent is None:
-            obj.matrix_world = matrix_gltf_to_blender(pynode.transform)
-            if correction is True:
-                if bpy.app.version < (2, 80, 0):
-                    obj.matrix_world = obj.matrix_world * correction_rotation()
-                else:
-                    obj.matrix_world = obj.matrix_world @ correction_rotation()
-            return
+        print('node set_transforms node: ' + pynode.name)
+        # print('transform: ' + str(pynode.transform))
+        print('translation: ' + str(pynode.translation))
+        print('rotation: ' + str(pynode.rotation))
+        print('scale: ' + str(pynode.scale))
 
-        for idx, node in enumerate(gltf.data.nodes):
-            if idx == parent:
-                if node.is_joint is True:
-                    obj.matrix_world = matrix_gltf_to_blender(pynode.transform)
-                    if correction is True:
-                        if bpy.app.version < (2, 80, 0):
-                            obj.matrix_world = obj.matrix_world * correction_rotation()
-                        else:
-                            obj.matrix_world = obj.matrix_world @ correction_rotation()
-                    return
-                else:
-                    if correction is True:
-                        if bpy.app.version < (2, 80, 0):
-                            obj.matrix_world = obj.matrix_world * correction_rotation()
-                        else:
-                            obj.matrix_world = obj.matrix_world @ correction_rotation()
-                    obj.matrix_world = matrix_gltf_to_blender(pynode.transform)
-                    return
+        if not (pynode.mesh is not None and pynode.skin is not None):
+            obj.matrix_world = matrix_gltf_to_blender(pynode.transform)
+        else:
+            # do transforms stuff for skinned meshes
+            # apply inverse transform
+            obj.matrix_world = matrix_gltf_to_blender(pynode.transform).inverted()
+            # do blender apply trasform operation
+            # bpy.ops.object.mode_set(mode='OBJECT')
+            bpy.ops.object.select_all(action='DESELECT')
+            obj.select_set(True)
+            bpy.context.view_layer.objects.active = obj
+            bpy.context.view_layer.update()
+            bpy.ops.object.transform_apply()
+            # apply normal transform
+            obj.matrix_world = matrix_gltf_to_blender(pynode.transform)
+            # sleep?
