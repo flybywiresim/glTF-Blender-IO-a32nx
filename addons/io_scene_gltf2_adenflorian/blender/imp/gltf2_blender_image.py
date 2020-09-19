@@ -15,6 +15,7 @@
 import bpy
 import os
 import tempfile
+import numpy
 from os.path import dirname, join, isfile, basename
 from urllib.parse import unquote
 
@@ -41,8 +42,8 @@ class BlenderImage():
                 if idx != -1:
                     return False, None, None
 
-            if isfile(join(dirname(gltf.filename), unquote(pyimage.uri))):
-                return True, join(dirname(gltf.filename), unquote(pyimage.uri)), basename(join(dirname(gltf.filename), unquote(pyimage.uri)))
+            if isfile(pyimage.uri):
+                return True, pyimage.uri, basename(pyimage.uri)
             else:
                 gltf.log.error("Missing file (index " + str(img_idx) + "): " + pyimage.uri)
                 return False, None, None
@@ -52,10 +53,28 @@ class BlenderImage():
 
         return False, None, None
 
+    # A32NX
+    # Original is from https://github.com/bestdani/msfs2blend
     @staticmethod
-    def create(gltf, img_idx):
+    def convert_normal_image(normal_image):
+        pixels = numpy.array(normal_image.pixels[:]).reshape((-1, 4))
+        rgb_pixels = pixels[:, 0:3]
+        rgb_pixels[:, 1] = 1.0 - rgb_pixels[:, 1]
+        rgb_pixels[:, 2] = numpy.sqrt(
+            1 - (rgb_pixels[:, 0] - 0.5) ** 2 - (rgb_pixels[:, 1] - 0.5) ** 2
+        )
+        pixel_data = pixels.reshape((-1, 1)).transpose()[0]
+        normal_image.pixels = pixel_data
+        try:
+            normal_image.save()
+        except RuntimeError:
+            print(f"ERROR: could not save converted image {normal_image.name}")
+
+    @staticmethod
+    def create(gltf, img_idx, label=''):
         """Image creation."""
         img = gltf.data.images[img_idx]
+        print('blender image create img_idx ' + str(img_idx))
 
         if img.blender_image_name is not None:
             # Image is already used somewhere
@@ -76,6 +95,11 @@ class BlenderImage():
                         return
 
                 blender_image = bpy.data.images.load(path)
+                # A32NX
+                print('blender image create bpy.data.images.load(path) ' + str(path))
+                if label == 'NORMALMAP':
+                    BlenderImage.convert_normal_image(blender_image)
+                # /A32NX
                 blender_image.name = img_name
                 img.blender_image_name = blender_image.name
                 return
@@ -97,6 +121,11 @@ class BlenderImage():
                 tmp_image.close()
 
                 blender_image = bpy.data.images.load(tmp_image.name)
+                # A32NX
+                print('blender image PACKED create bpy.data.images.load(path) ' + str(path))
+                if label == 'NORMALMAP':
+                    BlenderImage.convert_normal_image(blender_image)
+                # /A32NX
                 blender_image.pack()
                 blender_image.name = img_name
                 img.blender_image_name = blender_image.name

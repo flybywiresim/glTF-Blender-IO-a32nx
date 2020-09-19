@@ -13,6 +13,8 @@
 # limitations under the License.
 
 import bpy
+import subprocess
+import pathlib
 from .gltf2_blender_scene import BlenderScene
 from ...io.com.gltf2_io_trs import TRS
 
@@ -23,7 +25,7 @@ class BlenderGlTF():
         raise RuntimeError("%s should not be instantiated" % cls)
 
     @staticmethod
-    def create(gltf):
+    def create(gltf, report, addon_prefs, texture_folder_name, filepath):
         """Create glTF main method."""
         if bpy.app.version < (2, 80, 0):
             bpy.context.scene.render.engine = 'CYCLES'
@@ -31,6 +33,7 @@ class BlenderGlTF():
             if bpy.context.scene.render.engine not in ['CYCLES', 'BLENDER_EEVEE']:
                 bpy.context.scene.render.engine = 'BLENDER_EEVEE'
         BlenderGlTF.pre_compute(gltf)
+        BlenderGlTF.load_dds_images(gltf, report, addon_prefs, texture_folder_name, filepath)
 
         gltf.display_current_node = 0
         if gltf.data.nodes is not None:
@@ -350,3 +353,87 @@ class BlenderGlTF():
 
             suffix = '.%03d' % cntr
             cntr += 1
+
+    # Original is from https://github.com/bestdani/msfs2blend
+    @staticmethod
+    def load_dds_images(gltf, report, addon_prefs, texture_folder_name, filepath):
+        file_path = pathlib.Path(filepath)
+        textures_allowed = addon_prefs.textures_allowed
+        texture_in_dir = file_path.parent.parent / texture_folder_name
+
+        if textures_allowed:
+            texconv_path = pathlib.Path(addon_prefs.texconv_file)
+            texture_out_dir = pathlib.Path(addon_prefs.texture_target_dir)
+        else:
+            texconv_path = None
+            texture_out_dir = None
+
+        result = BlenderGlTF.convert_images(gltf, texture_in_dir, texconv_path, texture_out_dir, report)
+
+        print('done doing tex things ' + str(result))
+
+    # Original is from https://github.com/bestdani/msfs2blend
+    @staticmethod
+    def convert_images(gltf, texture_in_dir, texconv_path, texture_out_dir, report) -> list:
+        to_convert_images = []
+        converted_images = []
+        final_image_paths = []
+        for i, image in enumerate(gltf.data.images):
+            try:
+                dds_file = texture_in_dir / image.uri
+            except KeyError:
+                report({'ERROR'}, f"invalid image at {i}")
+                final_image_paths.append(None)
+                continue
+
+            if not dds_file.exists():
+                report({'ERROR'},
+                    f"invalid image file location at {i}: {dds_file}")
+                final_image_paths.append(None)
+                continue
+
+            final_image_paths.append('')
+            to_convert_images.append(str(dds_file))
+
+        output_dir_param = str(texture_out_dir)
+        texture_out_dir.mkdir(parents=True, exist_ok=True)
+        report({'INFO'}, "converting images with texconv")
+        try:
+            output_lines = subprocess.run(
+                [
+                    str(texconv_path),
+                    '-y',
+                    '-o', output_dir_param,
+                    '-f', 'rgba',
+                    '-ft', 'png',
+                    *to_convert_images
+                ],
+                check=True,
+                capture_output=True
+            ).stdout.decode('cp1252').split('\r\n')
+        except subprocess.CalledProcessError as e:
+            report({'ERROR'}, f"could not convert image textures {e}")
+            return final_image_paths
+        else:
+            for line in output_lines:
+                line: str
+                if line.startswith('writing'):
+                    png_file = line[len('writing '):]
+                    path = pathlib.Path(png_file)
+                    if path.exists():
+                        converted_images.append(path)
+                    else:
+                        converted_images.append(None)
+
+            conv_i = 0
+            for i, image in enumerate(final_image_paths):
+                if image is None:
+                    continue
+                try:
+                    # final_image_paths[i] = converted_images[conv_i]
+                    gltf.data.images[conv_i].uri = str(converted_images[conv_i])
+                except IndexError:
+                    final_image_paths[i] = None
+                else:
+                    conv_i += 1
+            return final_image_paths

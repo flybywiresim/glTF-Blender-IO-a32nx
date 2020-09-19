@@ -1098,16 +1098,35 @@ class Skin:
         result["skeleton"] = from_union([from_int, from_none], self.skeleton)
         return result
 
+# A32NX
+class MSFT_texture_dds:
+    """A texture and its sampler."""
+
+    def __init__(self, source):
+        self.source = source
+
+    @staticmethod
+    def from_dict(obj):
+        assert isinstance(obj, dict)
+        source = from_union([from_int, from_none], obj.get("source"))
+        return MSFT_texture_dds(source)
+
+    def to_dict(self):
+        result = {}
+        result["source"] = from_int(self.source)  # most viewers can't handle missing sources
+        return result
+
 
 class Texture:
     """A texture and its sampler."""
 
-    def __init__(self, extensions, extras, name, sampler, source):
+    def __init__(self, extensions, extras, name, sampler, source, msft_texture_dds):
         self.extensions = extensions
         self.extras = extras
         self.name = name
         self.sampler = sampler
         self.source = source
+        self.MSFT_texture_dds = msft_texture_dds
 
     @staticmethod
     def from_dict(obj):
@@ -1120,7 +1139,8 @@ class Texture:
         # The msfs gltf texture object don't have a root source prop
         # I have code in here that prevents textures from loading for now
         source = from_union([from_int, from_none], obj.get("source"))
-        return Texture(extensions, extras, name, sampler, source)
+        msft_texture_dds = MSFT_texture_dds.from_dict(extensions.get("MSFT_texture_dds"))
+        return Texture(extensions, extras, name, sampler, source, msft_texture_dds)
 
     def to_dict(self):
         result = {}

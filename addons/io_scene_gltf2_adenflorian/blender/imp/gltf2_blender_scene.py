@@ -33,9 +33,10 @@ class BlenderScene():
         gltf.blender_active_collection = None
         if scene_idx is not None:
             pyscene = gltf.data.scenes[scene_idx]
-            # list_nodes = list(pyscene.nodes)
+            list_nodes = list(pyscene.nodes)
+            # A32NX Used for development to limit what gets imported
             # list_nodes = list(filter(lambda x: 'YOKE' in gltf.data.nodes[x].name or 'THROTTLE' in gltf.data.nodes[x].name, pyscene.nodes))
-            list_nodes = list(filter(lambda x: 'YOKE' in gltf.data.nodes[x].name or 'THROTTLE' in gltf.data.nodes[x].name or 'COCKPIT' in gltf.data.nodes[x].name, pyscene.nodes))
+            # list_nodes = list(filter(lambda x: 'YOKE' in gltf.data.nodes[x].name or 'THROTTLE' in gltf.data.nodes[x].name or 'COCKPIT' in gltf.data.nodes[x].name, pyscene.nodes))
 
             # Create a new scene only if not already exists in .blend file
             # TODO : put in current scene instead ?

@@ -38,18 +38,25 @@ def make_texture_block(gltf, node_tree, tex_info, location, label, name=None, co
     pytexture = gltf.data.textures[tex_info.index]
 
     if pytexture.source is not None:
-        BlenderImage.create(gltf, pytexture.source)
+        BlenderImage.create(gltf, pytexture.source, label)
         pyimg = gltf.data.images[pytexture.source]
         blender_image_name = pyimg.blender_image_name
         if blender_image_name:
             tex_img.image = bpy.data.images[blender_image_name]
+    else:
+        # A32NX
+        if pytexture.MSFT_texture_dds is not None:
+            BlenderImage.create(gltf, pytexture.MSFT_texture_dds.source, label)
+            pyimg = gltf.data.images[pytexture.MSFT_texture_dds.source]
+            blender_image_name = pyimg.blender_image_name
+            if blender_image_name:
+                tex_img.image = bpy.data.images[blender_image_name]
 
     if colorspace == 'NONE':
-        if bpy.app.version < (2, 80, 0):
-            tex_img.color_space = 'NONE'
-        else:
-            if tex_img.image:
-                tex_img.image.colorspace_settings.is_data = True
+        if tex_img.image:
+            tex_img.image.colorspace_settings.is_data = True
+            # A32NX
+            tex_img.image.colorspace_settings.name = 'Non-Color'
 
     if pytexture.sampler is not None:
         pysampler = gltf.data.samplers[pytexture.sampler]
@@ -60,45 +67,48 @@ def make_texture_block(gltf, node_tree, tex_info, location, label, name=None, co
 
     # Mapping (transforms UVs for KHR_texture_transform)
 
-    mapping = node_tree.nodes.new('ShaderNodeMapping')
-    if name:
-        mapping.name = name + '.mapping'
-    mapping.location = location[0] - 500, location[1]
-    mapping.vector_type = 'POINT'
+    # Doesn't seem to be needed for MSFS stuff
+    # I thought it was breaking the normal map, but it might not have been
+    # So you can turn this back on if you want
+    # mapping = node_tree.nodes.new('ShaderNodeMapping')
+    # if name:
+    #     mapping.name = name + '.mapping'
+    # mapping.location = location[0] - 500, location[1]
+    # mapping.vector_type = 'POINT'
 
-    if tex_info.extensions and 'KHR_texture_transform' in tex_info.extensions:
-        transform = tex_info.extensions['KHR_texture_transform']
-        transform = texture_transform_gltf_to_blender(transform)
-        if bpy.app.version < (2, 81, 8):
-            mapping.translation[0] = transform['offset'][0]
-            mapping.translation[1] = transform['offset'][1]
-            mapping.rotation[2] = transform['rotation']
-            mapping.scale[0] = transform['scale'][0]
-            mapping.scale[1] = transform['scale'][1]
-        else:
-            mapping.inputs['Location'].default_value[0] = transform['offset'][0]
-            mapping.inputs['Location'].default_value[1] = transform['offset'][1]
-            mapping.inputs['Rotation'].default_value[2] = transform['rotation']
-            mapping.inputs['Scale'].default_value[0] = transform['scale'][0]
-            mapping.inputs['Scale'].default_value[1] = transform['scale'][1]
+    # if tex_info.extensions and 'KHR_texture_transform' in tex_info.extensions:
+    #     transform = tex_info.extensions['KHR_texture_transform']
+    #     transform = texture_transform_gltf_to_blender(transform)
+    #     if bpy.app.version < (2, 81, 8):
+    #         mapping.translation[0] = transform['offset'][0]
+    #         mapping.translation[1] = transform['offset'][1]
+    #         mapping.rotation[2] = transform['rotation']
+    #         mapping.scale[0] = transform['scale'][0]
+    #         mapping.scale[1] = transform['scale'][1]
+    #     else:
+    #         mapping.inputs['Location'].default_value[0] = transform['offset'][0]
+    #         mapping.inputs['Location'].default_value[1] = transform['offset'][1]
+    #         mapping.inputs['Rotation'].default_value[2] = transform['rotation']
+    #         mapping.inputs['Scale'].default_value[0] = transform['scale'][0]
+    #         mapping.inputs['Scale'].default_value[1] = transform['scale'][1]
 
     # UV Map (retrieves UV)
 
-    uv_map = node_tree.nodes.new('ShaderNodeUVMap')
-    if name:
-        uv_map.name = name + '.uv_map'
-    uv_map.location = location[0] - 1000, location[1]
+    # uv_map = node_tree.nodes.new('ShaderNodeUVMap')
+    # if name:
+    #     uv_map.name = name + '.uv_map'
+    # uv_map.location = location[0] - 1000, location[1]
 
-    texcoord_idx = tex_info.tex_coord or 0
-    if tex_info.extensions and 'KHR_texture_transform' in tex_info.extensions:
-        if 'texCoord' in tex_info.extensions['KHR_texture_transform']:
-            texcoord_idx = tex_info.extensions['KHR_texture_transform']['texCoord']
+    # texcoord_idx = tex_info.tex_coord or 0
+    # if tex_info.extensions and 'KHR_texture_transform' in tex_info.extensions:
+    #     if 'texCoord' in tex_info.extensions['KHR_texture_transform']:
+    #         texcoord_idx = tex_info.extensions['KHR_texture_transform']['texCoord']
 
-    uv_map.uv_map = 'UVMap' if texcoord_idx == 0 else 'UVMap.%03d' % texcoord_idx
+    # uv_map.uv_map = 'UVMap' if texcoord_idx == 0 else 'UVMap.%03d' % texcoord_idx
 
     # Links
-    node_tree.links.new(mapping.inputs[0], uv_map.outputs[0])
-    node_tree.links.new(tex_img.inputs[0], mapping.outputs[0])
+    # node_tree.links.new(mapping.inputs[0], uv_map.outputs[0])
+    # node_tree.links.new(tex_img.inputs[0], mapping.outputs[0])
 
     return tex_img
 

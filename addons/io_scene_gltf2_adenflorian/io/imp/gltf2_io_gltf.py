@@ -60,7 +60,8 @@ class glTFImporter():
         self.fmt_char_dict = {}
         self.fmt_char_dict[5120] = 'b'  # Byte
         self.fmt_char_dict[5121] = 'B'  # Unsigned Byte
-        self.fmt_char_dict[5122] = 'h'  # Short
+        # self.fmt_char_dict[5122] = 'h'  # Short
+        self.fmt_char_dict[5122] = 'e'  # 2 byte float, #AsoboThings
         self.fmt_char_dict[5123] = 'H'  # Unsigned Short
         self.fmt_char_dict[5125] = 'I'  # Unsigned Int
         self.fmt_char_dict[5126] = 'f'  # Float
