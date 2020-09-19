@@ -360,6 +360,7 @@ class BlenderGlTF():
         file_path = pathlib.Path(filepath)
         textures_allowed = addon_prefs.textures_allowed
         texture_in_dir = file_path.parent.parent / texture_folder_name
+        common_texture_in_dir = file_path.parent.parent.parent.parent.parent.parent / 'fs-base\\texture'
 
         if textures_allowed:
             texconv_path = pathlib.Path(addon_prefs.texconv_file)
@@ -368,29 +369,35 @@ class BlenderGlTF():
             texconv_path = None
             texture_out_dir = None
 
-        result = BlenderGlTF.convert_images(gltf, texture_in_dir, texconv_path, texture_out_dir, report)
+        result = BlenderGlTF.convert_images(gltf, texture_in_dir, common_texture_in_dir, texconv_path, texture_out_dir, report)
 
         print('done doing tex things ' + str(result))
 
     # Original is from https://github.com/bestdani/msfs2blend
     @staticmethod
-    def convert_images(gltf, texture_in_dir, texconv_path, texture_out_dir, report) -> list:
+    def convert_images(gltf, texture_in_dir, common_texture_in_dir, texconv_path, texture_out_dir, report) -> list:
         to_convert_images = []
         converted_images = []
         final_image_paths = []
         for i, image in enumerate(gltf.data.images):
             try:
                 dds_file = texture_in_dir / image.uri
+                # if file doesnt exist
+                # check in detail maps folder
             except KeyError:
                 report({'ERROR'}, f"invalid image at {i}")
                 final_image_paths.append(None)
                 continue
 
             if not dds_file.exists():
-                report({'ERROR'},
-                    f"invalid image file location at {i}: {dds_file}")
-                final_image_paths.append(None)
-                continue
+                dds_file = common_texture_in_dir / 'DETAILMAP' / image.uri
+                if not dds_file.exists():
+                    dds_file = common_texture_in_dir / 'GLASS' / image.uri
+                    if not dds_file.exists():
+                        report({'ERROR'},
+                            f"invalid image file location at {i}: {dds_file}")
+                        final_image_paths.append(None)
+                        continue
 
             final_image_paths.append('')
             to_convert_images.append(str(dds_file))
