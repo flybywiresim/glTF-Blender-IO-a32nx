@@ -37,6 +37,7 @@ class BlenderScene():
             # A32NX Used for development to limit what gets imported
             # list_nodes = list(filter(lambda x: 'YOKE' in gltf.data.nodes[x].name or 'THROTTLE' in gltf.data.nodes[x].name, pyscene.nodes))
             # list_nodes = list(filter(lambda x: 'YOKE' in gltf.data.nodes[x].name or 'THROTTLE' in gltf.data.nodes[x].name or 'COCKPIT' in gltf.data.nodes[x].name, pyscene.nodes))
+            # list_nodes = list(filter(lambda x: 'YOKE' in gltf.data.nodes[x].name or 'KNOB' in gltf.data.nodes[x].name or 'COCKPIT' in gltf.data.nodes[x].name, pyscene.nodes))
 
             # Create a new scene only if not already exists in .blend file
             # TODO : put in current scene instead ?
@@ -118,27 +119,28 @@ class BlenderScene():
             
             print('after rotation_quaternion: ' + str(armature_obj.rotation_quaternion))
 
-        # if gltf.data.animations:
-        #     for anim_idx, anim in enumerate(gltf.data.animations):
-        #         if 'yoke' not in anim.name and 'throttle' not in anim.name:
-        #             continue
-        #         print('processing animation ' + anim.name)
-        #         # Blender armature name -> action all its bones should use
-        #         gltf.arma_cache = {}
-        #         # Things we need to stash when we're done.
-        #         gltf.needs_stash = []
+        if gltf.data.animations:
+            for anim_idx, anim in enumerate(gltf.data.animations):
+                # if 'yoke' not in anim.name:
+                #     continue
+                print('processing animation ' + anim.name)
+                # Blender armature name -> action all its bones should use
+                gltf.arma_cache = {}
+                # Things we need to stash when we're done.
+                gltf.needs_stash = []
 
-        #         if list_nodes is not None:
-        #             for node_idx in list_nodes:
-        #                 BlenderAnimation.anim(gltf, anim_idx, node_idx)
+                if list_nodes is not None:
+                    for node_idx in list_nodes:
+                        BlenderAnimation.anim(gltf, anim_idx, node_idx)
 
-        #         for (obj, anim_name, action) in gltf.needs_stash:
-        #             simulate_stash(obj, anim_name, action)
+                for (obj, anim_name, action) in gltf.needs_stash:
+                    simulate_stash(obj, anim_name, action)
 
-        #     # Restore first animation
-        #     anim_name = gltf.data.animations[0].track_name
-        #     for node_idx in list_nodes:
-        #         BlenderAnimation.restore_animation(gltf, node_idx, anim_name)
+            # Restore first animation
+            # A32NX Don't think we need this, it just makes things weird
+            # anim_name = gltf.data.animations[0].track_name
+            # for node_idx in list_nodes:
+            #     BlenderAnimation.restore_animation(gltf, node_idx, anim_name)
 
         if bpy.app.debug_value != 100:
             # Parent root node to rotation object
@@ -268,6 +270,17 @@ class BlenderScene():
                 #     @ bpy.data.objects[pynode.blender_armature_name].matrix_world.to_quaternion()
                 # obj.scale = bone_scale_mat @ obj.scale
 
+        # A32NX
+        for obj in bpy.data.objects:
+            if obj.animation_data is not None:
+                if obj.animation_data.nla_tracks is not None:
+                    for track in obj.animation_data.nla_tracks:
+                        # Useful for previewing all animations at once
+                        track.mute = False
+                        for strip in track.strips:
+                            # Makes animations longer and smoother
+                            # and places the keyframes on actual frames
+                            strip.scale = 10
 
         # Make first root object the new active one
         if list_nodes is not None:

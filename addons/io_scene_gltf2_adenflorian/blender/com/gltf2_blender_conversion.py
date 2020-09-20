@@ -25,6 +25,11 @@ def loc_gltf_to_blender(loc):
     """Location."""
     return loc
 
+# A32NX
+def loc_gltf_to_blender_with_fix(loc):
+    """Location."""
+    return [loc[0], -loc[2], loc[1]]
+
 def scale_gltf_to_blender(scale):
     """Scaling."""
     return scale
@@ -46,6 +51,11 @@ def correction_rotation():
     # Correction is needed for lamps, because Yup2Zup is not written in vertices
     # and lamps has no vertices :)
     return Quaternion((sqrt(2)/2, -sqrt(2)/2, 0.0, 0.0)).to_matrix().to_4x4()
+
+# A32NX
+def asobo_rotation():
+    """Correction of Rotation."""
+    return Quaternion((0, 0, -sqrt(2)/2, sqrt(2)/2)).to_matrix().to_4x4()
 
 def texture_transform_blender_to_gltf(mapping_transform):
     """
