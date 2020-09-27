@@ -640,13 +640,17 @@ class Image:
 
     def to_dict(self):
         result = {}
-        result["bufferView"] = from_union([from_int, from_none], self.buffer_view)
-        result["extensions"] = from_union([lambda x: from_dict(from_extension, x), from_none],
-                                          self.extensions)
-        result["extras"] = from_extra(self.extras)
-        result["mimeType"] = from_union([from_str, from_none], self.mime_type)
-        result["name"] = from_union([from_str, from_none], self.name)
-        result["uri"] = from_union([from_str, from_none], self.uri)
+        # result["bufferView"] = from_union([from_int, from_none], self.buffer_view)
+        # result["extensions"] = from_union([lambda x: from_dict(from_extension, x), from_none], self.extensions)
+        # result["extras"] = from_extra(self.extras)
+        result["extras"] = 'ASOBO_image_converted_meta'
+        # result["mimeType"] = from_union([from_str, from_none], self.mime_type)
+        # result["name"] = from_union([from_str, from_none], self.name)
+        old_uri = from_str(self.uri)
+        l = len(old_uri)
+        ext = old_uri[l-7:l-4]
+        new_uri = old_uri[:l-8] + '.' + ext + '.DDS'
+        result["uri"] = new_uri
         return result
 
 
@@ -1120,7 +1124,7 @@ class MSFT_texture_dds:
 class Texture:
     """A texture and its sampler."""
 
-    def __init__(self, extensions, extras, name, sampler, source, msft_texture_dds):
+    def __init__(self, extensions, extras, name, sampler, source, msft_texture_dds=''):
         self.extensions = extensions
         self.extras = extras
         self.name = name
@@ -1144,12 +1148,16 @@ class Texture:
 
     def to_dict(self):
         result = {}
-        result["extensions"] = from_union([lambda x: from_dict(from_extension, x), from_none],
-                                          self.extensions)
-        result["extras"] = from_extra(self.extras)
-        result["name"] = from_union([from_str, from_none], self.name)
-        result["sampler"] = from_union([from_int, from_none], self.sampler)
-        result["source"] = from_int(self.source)  # most viewers can't handle missing sources
+        # result["extensions"] = from_union([lambda x: from_dict(from_extension, x), from_none], self.extensions)
+        result["extensions"] = {
+            'MSFT_texture_dds': {
+                'source': from_int(self.source),
+            }
+        }
+        # result["extras"] = from_extra(self.extras)
+        # result["name"] = from_union([from_str, from_none], self.name)
+        # result["sampler"] = from_union([from_int, from_none], self.sampler)
+        # result["source"] = from_int(self.source)  # most viewers can't handle missing sources
         return result
 
 
