@@ -33,7 +33,7 @@ class BlenderGlTF():
             if bpy.context.scene.render.engine not in ['CYCLES', 'BLENDER_EEVEE']:
                 bpy.context.scene.render.engine = 'BLENDER_EEVEE'
         BlenderGlTF.pre_compute(gltf)
-        BlenderGlTF.load_dds_images(gltf, report, addon_prefs, texture_folder_name, filepath)
+        # BlenderGlTF.load_dds_images(gltf, report, addon_prefs, texture_folder_name, filepath)
 
         gltf.display_current_node = 0
         if gltf.data.nodes is not None:
@@ -267,7 +267,7 @@ class BlenderGlTF():
         if gltf.data.skins:
             for skin_id, skin in enumerate(gltf.data.skins):
                 # init blender values
-                skin.blender_armature_name = None
+                gltf.data.nodes[skin.skeleton].blender_armature_name = None
                 gltf.data.nodes[skin.skeleton].is_skeleton = True
                 # if skin.skeleton and skin.skeleton not in skin.joints:
                 #     gltf.data.nodes[skin.skeleton].is_joint = True
@@ -394,10 +394,12 @@ class BlenderGlTF():
                 if not dds_file.exists():
                     dds_file = common_texture_in_dir / 'GLASS' / image.uri
                     if not dds_file.exists():
-                        report({'ERROR'},
-                            f"invalid image file location at {i}: {dds_file}")
-                        final_image_paths.append(None)
-                        continue
+                        dds_file = common_texture_in_dir / 'INTERIORS' / image.uri
+                        if not dds_file.exists():
+                            report({'ERROR'},
+                                f"invalid image file location at {i}: {dds_file}")
+                            final_image_paths.append(None)
+                            continue
 
             final_image_paths.append('')
             to_convert_images.append(str(dds_file))

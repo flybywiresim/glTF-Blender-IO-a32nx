@@ -43,9 +43,11 @@ class BlenderAnimation():
         """Restores the actions for an animation by its track name on
         the subtree starting at node_idx."""
         node = gltf.data.nodes[node_idx]
+        pyskin = gltf.data.skins[node.skin_id]
+        pyskeletonnode = gltf.data.nodes[pyskin.skeleton]
 
         if node.is_joint:
-            obj = bpy.data.objects[gltf.data.skins[node.skin_id].blender_armature_name]
+            obj = bpy.data.objects[pyskeletonnode.blender_armature_name]
         else:
             obj = bpy.data.objects[node.blender_object]
 

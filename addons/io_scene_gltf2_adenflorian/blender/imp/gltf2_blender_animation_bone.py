@@ -230,7 +230,9 @@ class BlenderBoneAnim():
     def anim(gltf, anim_idx, node_idx):
         """Manage animation."""
         node = gltf.data.nodes[node_idx]
-        blender_armature_name = gltf.data.skins[node.skin_id].blender_armature_name
+        pyskin = gltf.data.skins[node.skin_id]
+        pyskeletonnode = gltf.data.nodes[pyskin.skeleton]
+        blender_armature_name = pyskeletonnode.blender_armature_name
         obj = bpy.data.objects[blender_armature_name]
         bone = obj.pose.bones[node.blender_bone_name]
 

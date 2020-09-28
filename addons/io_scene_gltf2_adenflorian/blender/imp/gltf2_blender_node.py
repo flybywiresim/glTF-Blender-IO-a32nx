@@ -51,9 +51,11 @@ class BlenderNode():
                 gltf.log.info("Blender create Bone node " + pynode.name)
             else:
                 gltf.log.info("Blender create Bone node")
+            pyskin = gltf.data.skins[pynode.skin_id]
+            pyskeletonnode = gltf.data.nodes[pyskin.skeleton]
             # Check if corresponding armature is already created, create it if needed
-            if gltf.data.skins[pynode.skin_id].blender_armature_name is None:
-                BlenderSkin.create_armature(gltf, pynode.skin_id, parent)
+            if pyskeletonnode.blender_armature_name is None:
+                BlenderSkin.create_armature(gltf, pyskin.skeleton, pyskeletonnode, parent)
 
             BlenderSkin.create_bone(gltf, pynode.skin_id, node_idx, parent)
 
@@ -175,6 +177,9 @@ class BlenderNode():
             if node_idx == parent:
                 if node.blender_object:
                     obj.parent = bpy.data.objects[node.blender_object]
+                    return
+                if node.blender_armature_name is not None:
+                    obj.parent = bpy.data.objects[node.blender_armature_name]
                     return
 
         gltf.log.error("ERROR, parent not found")

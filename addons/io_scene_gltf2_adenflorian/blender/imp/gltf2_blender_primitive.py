@@ -60,6 +60,7 @@ class BlenderPrimitive():
         base_vertex_index = pyprimitive.extras.get('ASOBO_primitive').get('BaseVertexIndex')
         tri_count = pyprimitive.extras.get('ASOBO_primitive').get('PrimitiveCount')
         start_index = pyprimitive.extras.get('ASOBO_primitive').get('StartIndex')
+        asobo_vertex_type = pyprimitive.extras.get('ASOBO_primitive').get('VertexType')
 
         if base_vertex_index is None:
             base_vertex_index = 0
@@ -199,8 +200,10 @@ class BlenderPrimitive():
         weight_sets = []
         set_num = 0
         while 'JOINTS_%d' % set_num in attributes and 'WEIGHTS_%d' % set_num in attributes:
+            # print('WEIGHTS_%d' % set_num)
             joint_data = BinaryData.get_data_from_accessor(gltf, attributes['JOINTS_%d' % set_num], cache=True)
             weight_data = BinaryData.get_data_from_accessor(gltf, attributes['WEIGHTS_%d' % set_num], cache=True)
+            # print(str(weight_data))
 
             joint_sets.append(joint_data)
             weight_sets.append(weight_data)
@@ -212,11 +215,17 @@ class BlenderPrimitive():
 
             for joint_set, weight_set in zip(joint_sets, weight_sets):
                 for bidx, pidx in vert_idxs:
-                    for j in range(0, 4):
-                        weight = weight_set[pidx][j]
+                    if asobo_vertex_type == 'BLEND1':
+                        weight = weight_set[pidx][0]
                         if weight != 0.0:
-                            joint = joint_set[pidx][j]
+                            joint = joint_set[pidx][0]
                             bme_verts[bidx][layer][joint] = weight
+                    else:
+                        for j in range(0, 4):
+                            weight = weight_set[pidx][j]
+                            if weight != 0.0:
+                                joint = joint_set[pidx][j]
+                                bme_verts[bidx][layer][joint] = weight
 
         # Set morph target positions (no normals/tangents)
         for sk, target in enumerate(pyprimitive.targets or []):
