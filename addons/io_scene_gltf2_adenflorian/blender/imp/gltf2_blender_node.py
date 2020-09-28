@@ -29,15 +29,17 @@ class BlenderNode():
     def create_vnode(gltf, vnode_id):
         """Create VNode and all its descendants."""
         vnode = gltf.vnodes[vnode_id]
+        if vnode.name is not None:
+            print('create_vnode: ' + vnode.name)
 
         gltf.display_current_node += 1
         if bpy.app.debug_value == 101:
             gltf.log.critical("Node %d of %d (id %s)", gltf.display_current_node, len(gltf.vnodes), vnode_id)
 
-        if vnode.type == VNode.Object:
+        if vnode.type == VNode.Object or vnode.is_arma:
             BlenderNode.create_object(gltf, vnode_id)
-            if vnode.is_arma:
-                BlenderNode.create_bones(gltf, vnode_id)
+        if vnode.is_arma:
+            BlenderNode.create_bones(gltf, vnode_id)
 
         elif vnode.type == VNode.Bone:
             # These are created with their armature
@@ -71,7 +73,8 @@ class BlenderNode():
 
         elif vnode.is_arma:
             armature = bpy.data.armatures.new(vnode.arma_name)
-            name = vnode.name or armature.name
+            # name = vnode.name or armature.name
+            name = armature.name
             obj = bpy.data.objects.new(name, armature)
 
         else:
@@ -95,10 +98,13 @@ class BlenderNode():
         # Set parent
         if vnode.parent is not None:
             parent_vnode = gltf.vnodes[vnode.parent]
+            print('Set parent for child: ' + vnode.name)
+            print('parent: ' + parent_vnode.name)
             if parent_vnode.type == VNode.Object:
                 obj.parent = parent_vnode.blender_object
             elif parent_vnode.type == VNode.Bone:
                 arma_vnode = gltf.vnodes[parent_vnode.bone_arma]
+                print('parent arma: ' + arma_vnode.name)
                 obj.parent = arma_vnode.blender_object
                 obj.parent_type = 'BONE'
                 obj.parent_bone = parent_vnode.blender_bone_name
@@ -118,14 +124,14 @@ class BlenderNode():
         armature = blender_arma.data
 
         # Find all bones for this arma
-        bone_ids = []
-        def visit(id):  # Depth-first walk
-            if gltf.vnodes[id].type == VNode.Bone:
-                bone_ids.append(id)
-                for child in gltf.vnodes[id].children:
-                    visit(child)
-        for child in arma.children:
-            visit(child)
+        bone_ids = arma.joints
+        # def visit(id):  # Depth-first walk
+        #     if gltf.vnodes[id].type == VNode.Bone:
+        #         bone_ids.append(id)
+        #         for child in gltf.vnodes[id].children:
+        #             visit(child)
+        # for child in arma.children:
+        #     visit(child)
 
         # Switch into edit mode to create all edit bones
 
@@ -156,7 +162,7 @@ class BlenderNode():
         for id in bone_ids:
             vnode = gltf.vnodes[id]
             parent_vnode = gltf.vnodes[vnode.parent]
-            if parent_vnode.type == VNode.Bone:
+            if parent_vnode.type == VNode.Bone and parent_vnode.bone_arma == vnode.bone_arma:
                 editbone = armature.edit_bones[vnode.blender_bone_name]
                 parent_editbone = armature.edit_bones[parent_vnode.blender_bone_name]
                 editbone.parent = parent_editbone

@@ -23,7 +23,7 @@ class BlenderGlTF():
         raise RuntimeError("%s should not be instantiated" % cls)
 
     @staticmethod
-    def create(gltf):
+    def create(gltf, report, addon_prefs, texture_folder_name, filepath):
         """Create glTF main method, with optional profiling"""
         profile = bpy.app.debug_value == 102
         if profile:

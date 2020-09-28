@@ -55,6 +55,23 @@ class BlenderPrimitive():
         bme_edges = bme.edges
         bme_faces = bme.faces
 
+        base_vertex_index = pyprimitive.extras.get('ASOBO_primitive').get('BaseVertexIndex')
+        tri_count = pyprimitive.extras.get('ASOBO_primitive').get('PrimitiveCount')
+        start_index = pyprimitive.extras.get('ASOBO_primitive').get('StartIndex')
+        asobo_vertex_type = pyprimitive.extras.get('ASOBO_primitive').get('VertexType')
+
+        if base_vertex_index is None:
+            base_vertex_index = 0
+
+        if start_index is None:
+            start_index = 0
+        
+        indices = list(map(lambda x: x + base_vertex_index, indices[start_index:(start_index + (tri_count * 3))]))
+
+        weight_count = 4
+        if asobo_vertex_type == 'BLEND1':
+            weight_count = 1
+
         # Gather up the joints/weights (multiple sets allow >4 influences)
         joint_sets = []
         weight_sets = []
@@ -86,7 +103,7 @@ class BlenderPrimitive():
                 # don't do it (ex. CesiumMan), so normalize.
                 weight_sum = 0
                 for joint_set, weight_set in zip(joint_sets, weight_sets):
-                    for j in range(0, 4):
+                    for j in range(0, weight_count):
                         weight = weight_set[pidx][j]
                         if weight != 0.0:
                             weight_sum += weight
@@ -101,7 +118,7 @@ class BlenderPrimitive():
                 out = Vector((0, 0, 0, 0))
                 weight_sum = 0
                 for joint_set, weight_set in zip(joint_sets, weight_sets):
-                    for j in range(0, 4):
+                    for j in range(0, weight_count):
                         weight = weight_set[pidx][j]
                         if weight != 0.0:
                             weight_sum += weight
@@ -239,7 +256,7 @@ class BlenderPrimitive():
 
             for joint_set, weight_set in zip(joint_sets, weight_sets):
                 for bidx, pidx in vert_idxs:
-                    for j in range(0, 4):
+                    for j in range(0, weight_count):
                         weight = weight_set[pidx][j]
                         if weight != 0.0:
                             joint = joint_set[pidx][j]

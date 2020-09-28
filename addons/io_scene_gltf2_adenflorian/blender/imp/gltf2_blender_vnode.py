@@ -114,6 +114,7 @@ def init_vnodes(gltf):
         vnode = VNode()
         gltf.vnodes[i] = vnode
         vnode.name = pynode.name
+        print('init_vnodes: ' + vnode.name)
         vnode.default_name = 'Node_%d' % i
         vnode.children = list(pynode.children or [])
         vnode.base_trs = get_node_trs(gltf, pynode)
@@ -135,6 +136,7 @@ def init_vnodes(gltf):
     gltf.vnodes['root'].type = VNode.DummyRoot
     gltf.vnodes['root'].default_name = 'Root'
     gltf.vnodes['root'].children = roots
+    gltf.vnodes['root'].name = 'root'
     for root in roots:
         gltf.vnodes[root].parent = 'root'
 
@@ -156,69 +158,84 @@ def mark_bones_and_armas(gltf):
     joint as a bone.
     """
     for skin in gltf.data.skins or []:
-        descendants = list(skin.joints)
-        if skin.skeleton is not None:
-            descendants.append(skin.skeleton)
-        arma_id = deepest_common_ancestor(gltf, descendants)
+        # descendants = list(skin.joints)
+        # if skin.skeleton is not None:
+        #     descendants.append(skin.skeleton)
+        # arma_id = deepest_common_ancestor(gltf, descendants)
 
-        if arma_id in skin.joints:
-            arma_id = gltf.vnodes[arma_id].parent
+        # if arma_id in skin.joints:
+        #     arma_id = gltf.vnodes[arma_id].parent
 
-        if gltf.vnodes[arma_id].type != VNode.Bone:
-            gltf.vnodes[arma_id].type = VNode.Object
+        # print('arma_id: ' + str(arma_id))
+
+        # for joint in skin.joints:
+        #     while joint != arma_id:
+        #         gltf.vnodes[joint].type = VNode.Bone
+        #         gltf.vnodes[joint].is_arma = False
+        #         joint = gltf.vnodes[joint].parent
+
+        arma_id = skin.skeleton
+
+        if gltf.vnodes[arma_id].is_arma != True:
+            # gltf.vnodes[arma_id].type = VNode.Object
             gltf.vnodes[arma_id].is_arma = True
-            gltf.vnodes[arma_id].arma_name = skin.name or 'Armature'
+            # gltf.vnodes[arma_id].arma_name = skin.name or 'Armature'
+            gltf.vnodes[arma_id].arma_name = 'Armature_' + gltf.vnodes[arma_id].name
+            gltf.vnodes[arma_id].joints = []
 
         for joint in skin.joints:
-            while joint != arma_id:
-                gltf.vnodes[joint].type = VNode.Bone
+            gltf.vnodes[joint].type = VNode.Bone
+            if joint != arma_id:
                 gltf.vnodes[joint].is_arma = False
-                joint = gltf.vnodes[joint].parent
+            gltf.vnodes[joint].bone_arma = arma_id
+            if joint not in gltf.vnodes[arma_id].joints:
+                gltf.vnodes[arma_id].joints.append(joint)
 
     # Mark the armature each bone is a descendant of.
 
-    def visit(vnode_id, cur_arma):  # Depth-first walk
-        vnode = gltf.vnodes[vnode_id]
+    # def visit(vnode_id, cur_arma):  # Depth-first walk
+    #     vnode = gltf.vnodes[vnode_id]
 
-        if vnode.is_arma:
-            cur_arma = vnode_id
-        elif vnode.type == VNode.Bone:
-            vnode.bone_arma = cur_arma
-        else:
-            cur_arma = None
+    #     if vnode.is_arma:
+    #         cur_arma = vnode_id
+    #         vnode.bone_arma = cur_arma
+    #     elif vnode.type == VNode.Bone:
+    #         vnode.bone_arma = cur_arma
+    #     else:
+    #         cur_arma = None
 
-        for child in vnode.children:
-            visit(child, cur_arma)
+    #     for child in vnode.children:
+    #         visit(child, cur_arma)
 
-    visit('root', cur_arma=None)
+    # visit('root', cur_arma=None)
 
-def deepest_common_ancestor(gltf, vnode_ids):
-    """Find the deepest (improper) ancestor of a set of vnodes."""
-    path_to_ancestor = []  # path to deepest ancestor so far
-    for vnode_id in vnode_ids:
-        path = path_from_root(gltf, vnode_id)
-        if not path_to_ancestor:
-            path_to_ancestor = path
-        else:
-            path_to_ancestor = longest_common_prefix(path, path_to_ancestor)
-    return path_to_ancestor[-1]
+# def deepest_common_ancestor(gltf, vnode_ids):
+#     """Find the deepest (improper) ancestor of a set of vnodes."""
+#     path_to_ancestor = []  # path to deepest ancestor so far
+#     for vnode_id in vnode_ids:
+#         path = path_from_root(gltf, vnode_id)
+#         if not path_to_ancestor:
+#             path_to_ancestor = path
+#         else:
+#             path_to_ancestor = longest_common_prefix(path, path_to_ancestor)
+#     return path_to_ancestor[-1]
 
-def path_from_root(gltf, vnode_id):
-    """Returns the ids of all vnodes from the root to vnode_id."""
-    path = []
-    while vnode_id is not None:
-        path.append(vnode_id)
-        vnode_id = gltf.vnodes[vnode_id].parent
-    path.reverse()
-    return path
+# def path_from_root(gltf, vnode_id):
+#     """Returns the ids of all vnodes from the root to vnode_id."""
+#     path = []
+#     while vnode_id is not None:
+#         path.append(vnode_id)
+#         vnode_id = gltf.vnodes[vnode_id].parent
+#     path.reverse()
+#     return path
 
-def longest_common_prefix(list1, list2):
-    i = 0
-    while i != min(len(list1), len(list2)):
-        if list1[i] != list2[i]:
-            break
-        i += 1
-    return list1[:i]
+# def longest_common_prefix(list1, list2):
+#     i = 0
+#     while i != min(len(list1), len(list2)):
+#         if list1[i] != list2[i]:
+#             break
+#         i += 1
+#     return list1[:i]
 
 
 def move_skinned_meshes(gltf):

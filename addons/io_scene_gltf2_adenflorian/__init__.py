@@ -892,7 +892,7 @@ class ImportGLTF2(Operator, ImportHelper):
             'the inverse bind matrices.\n'
             'When off, use default/rest pose as bind pose'
         ),
-        default=True,
+        default=False,
     )
 
     def draw(self, context):
