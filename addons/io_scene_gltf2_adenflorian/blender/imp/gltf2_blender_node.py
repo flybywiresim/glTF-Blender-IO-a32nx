@@ -36,7 +36,7 @@ class BlenderNode():
         if bpy.app.debug_value == 101:
             gltf.log.critical("Node %d of %d (id %s)", gltf.display_current_node, len(gltf.vnodes), vnode_id)
 
-        if vnode.type == VNode.Object:
+        if vnode.type == VNode.Object or vnode.is_arma == True:
             BlenderNode.create_object(gltf, vnode_id)
             if vnode.is_arma:
                 BlenderNode.create_bones(gltf, vnode_id)
@@ -73,7 +73,8 @@ class BlenderNode():
 
         elif vnode.is_arma:
             armature = bpy.data.armatures.new(vnode.arma_name)
-            name = vnode.name or armature.name
+            # name = vnode.name or armature.name
+            name = armature.name
             obj = bpy.data.objects.new(name, armature)
 
         else:
@@ -84,8 +85,11 @@ class BlenderNode():
 
         # Set extras (if came from a glTF node)
         if isinstance(vnode_id, int):
-            pynode = gltf.data.nodes[vnode_id]
-            set_extras(obj, pynode.extras)
+            try:
+                pynode = gltf.data.nodes[vnode_id]
+                set_extras(obj, pynode.extras)
+            except IndexError:
+                pass
 
         # Set transform
         trans, rot, scale = vnode.trs()
@@ -124,6 +128,7 @@ class BlenderNode():
 
         # Find all bones for this arma
         bone_ids = []
+        bone_ids.append(arma_id)
         def visit(id):  # Depth-first walk
             if gltf.vnodes[id].type == VNode.Bone:
                 bone_ids.append(id)

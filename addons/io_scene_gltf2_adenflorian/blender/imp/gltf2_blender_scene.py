@@ -39,7 +39,7 @@ class BlenderScene():
         gltf.display_current_node = 0  # for debugging
         BlenderNode.create_vnode(gltf, 'root')
 
-        BlenderScene.create_animations(gltf)
+        # BlenderScene.create_animations(gltf)
 
         if bpy.context.mode != 'OBJECT':
             bpy.ops.object.mode_set(mode='OBJECT')

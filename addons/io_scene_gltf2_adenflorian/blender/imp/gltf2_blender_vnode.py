@@ -135,6 +135,7 @@ def init_vnodes(gltf):
     gltf.vnodes['root'].type = VNode.DummyRoot
     gltf.vnodes['root'].default_name = 'Root'
     gltf.vnodes['root'].children = roots
+    gltf.vnodes['root'].name = 'root'
     for root in roots:
         gltf.vnodes[root].parent = 'root'
 
@@ -156,21 +157,48 @@ def mark_bones_and_armas(gltf):
     joint as a bone.
     """
     for skin in gltf.data.skins or []:
+        # print(f'--mark_bones_and_armas skin: {skin.name}')
         descendants = list(skin.joints)
         if skin.skeleton is not None:
             descendants.append(skin.skeleton)
         arma_id = deepest_common_ancestor(gltf, descendants)
 
+        # If the deepest common ancestor is in the joints list, and its parent is a bone
+        # then don't make a new armature, because this skeleton exists inside of another skeleton already
         if arma_id in skin.joints:
-            arma_id = gltf.vnodes[arma_id].parent
+            arma_parent = gltf.vnodes[arma_id].parent
 
-        if gltf.vnodes[arma_id].type != VNode.Bone:
-            gltf.vnodes[arma_id].type = VNode.Object
-            gltf.vnodes[arma_id].is_arma = True
-            gltf.vnodes[arma_id].arma_name = skin.name or 'Armature'
+        if gltf.vnodes[arma_parent].type != VNode.Bone and gltf.vnodes[arma_parent].is_arma != True:
+            # gltf.vnodes[arma_id].type = VNode.Bone
+            # gltf.vnodes[arma_id].is_arma = True
+            # gltf.vnodes[arma_id].arma_name = skin.name or 'Armature'
+            # gltf.vnodes[arma_id].arma_name = 'Armature_' + skin.name
+    
+            new_vnode = VNode()
+            i = len(gltf.vnodes)
+            gltf.vnodes[i] = new_vnode
+            new_vnode.name = 'Armature_' + skin.name
+            new_vnode.default_name = 'Node_%d' % i
+            new_vnode.children = list([arma_id])
+            new_vnode.base_trs = gltf.vnodes[arma_id].base_trs
+            new_vnode.type = VNode.Object
+            new_vnode.is_arma = True
+            new_vnode.arma_name = new_vnode.name
+            new_vnode.parent = gltf.vnodes[arma_id].parent
+            gltf.vnodes[new_vnode.parent].children = list(filter(lambda x: x != arma_id, gltf.vnodes[new_vnode.parent].children))
+            gltf.vnodes[new_vnode.parent].children.append(i)
+            gltf.vnodes[arma_id].parent = i
+            arma_id = i
+        else:
+            gltf.vnodes[arma_id].type = VNode.Bone
+            gltf.vnodes[arma_id].is_arma = False
+
+        # print(f'---arma_id: {arma_id}')
 
         for joint in skin.joints:
+            # print(f'----joint: {joint}')
             while joint != arma_id:
+                # print(f'------ {gltf.vnodes[joint].name} ')
                 gltf.vnodes[joint].type = VNode.Bone
                 gltf.vnodes[joint].is_arma = False
                 joint = gltf.vnodes[joint].parent
@@ -182,6 +210,7 @@ def mark_bones_and_armas(gltf):
 
         if vnode.is_arma:
             cur_arma = vnode_id
+            vnode.bone_arma = cur_arma
         elif vnode.type == VNode.Bone:
             vnode.bone_arma = cur_arma
         else:
@@ -245,8 +274,10 @@ def move_skinned_meshes(gltf):
             continue
 
         pyskin = gltf.data.skins[skin]
-        arma = gltf.vnodes[pyskin.joints[0]].bone_arma
-
+        try:
+            arma = gltf.vnodes[pyskin.joints[0]].bone_arma
+        except:
+            print('asd')
         # First try moving the whole node if we can do it without
         # messing anything up.
         is_animated = (
