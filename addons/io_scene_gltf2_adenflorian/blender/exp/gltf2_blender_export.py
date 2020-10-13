@@ -22,6 +22,7 @@ from io_scene_gltf2_adenflorian.blender.exp import gltf2_blender_export_keys
 from io_scene_gltf2_adenflorian.blender.exp import gltf2_blender_gather
 from io_scene_gltf2_adenflorian.blender.exp.gltf2_blender_gltf2_exporter import GlTF2Exporter
 from io_scene_gltf2_adenflorian.io.com.gltf2_io_debug import print_console, print_newline
+from io_scene_gltf2_adenflorian.io.com import gltf2_io
 from io_scene_gltf2_adenflorian.io.exp import gltf2_io_export
 from io_scene_gltf2_adenflorian.io.exp import gltf2_io_draco_compression_extension
 from io_scene_gltf2_adenflorian.io.exp.gltf2_io_user_extensions import export_user_extensions
@@ -61,6 +62,98 @@ def __export(export_settings):
 
     return json, buffer
 
+def __create_asobo_buffer_views():
+
+    asobo_buffer_views = {
+        'bufferViewFloatMat4': None,
+        'bufferViewAnimationFloatScalar': None,
+        'bufferViewAnimationFloatVec3': None,
+        'bufferViewAnimationFloatVec4': None,
+        'BufferViewVertexND': None,
+        'BufferViewIndex': None,
+        'BufferViewVertex4Blend': None,
+        'BufferViewVertex1Blend': None,
+    }
+    asobo_buffer_views['bufferViewFloatMat4'] = gltf2_io.BufferView(
+        buffer=0,
+        byte_length=0,
+        byte_offset=0,
+        byte_stride=None,
+        extensions=None,
+        extras=None,
+        name='bufferViewFloatMat4',
+        target=None
+    )
+    asobo_buffer_views['bufferViewAnimationFloatScalar'] = gltf2_io.BufferView(
+        buffer=0,
+        byte_length=0,
+        byte_offset=0,
+        byte_stride=None,
+        extensions=None,
+        extras=None,
+        name='bufferViewAnimationFloatScalar',
+        target=None
+    )
+    asobo_buffer_views['bufferViewAnimationFloatVec3'] = gltf2_io.BufferView(
+        buffer=0,
+        byte_length=0,
+        byte_offset=0,
+        byte_stride=None,
+        extensions=None,
+        extras=None,
+        name='bufferViewAnimationFloatVec3',
+        target=None
+    )
+    asobo_buffer_views['bufferViewAnimationFloatVec4'] = gltf2_io.BufferView(
+        buffer=0,
+        byte_length=0,
+        byte_offset=0,
+        byte_stride=None,
+        extensions=None,
+        extras=None,
+        name='bufferViewAnimationFloatVec4',
+        target=None
+    )
+    asobo_buffer_views['BufferViewVertexND'] = gltf2_io.BufferView(
+        buffer=0,
+        byte_length=0,
+        byte_offset=0,
+        byte_stride=36,
+        extensions=None,
+        extras=None,
+        name='BufferViewVertexND',
+        target=34962
+    )
+    asobo_buffer_views['BufferViewIndex'] = gltf2_io.BufferView(
+        buffer=0,
+        byte_length=0,
+        byte_offset=0,
+        byte_stride=None,
+        extensions=None,
+        extras=None,
+        name='BufferViewIndex',
+        target=34963
+    )
+    asobo_buffer_views['BufferViewVertex4Blend'] = gltf2_io.BufferView(
+        buffer=0,
+        byte_length=0,
+        byte_offset=0,
+        byte_stride=48,
+        extensions=None,
+        extras=None,
+        name='BufferViewVertex4Blend',
+        target=34962
+    )
+    asobo_buffer_views['BufferViewVertex1Blend'] = gltf2_io.BufferView(
+        buffer=0,
+        byte_length=0,
+        byte_offset=0,
+        byte_stride=44,
+        extensions=None,
+        extras=None,
+        name='BufferViewVertex1Blend',
+        target=34962
+    )
 
 def __gather_gltf(exporter, export_settings):
     export_settings['bounding_box_max_x'] = 0
@@ -75,6 +168,8 @@ def __gather_gltf(exporter, export_settings):
     plan = {'active_scene_idx': active_scene_idx, 'scenes': scenes, 'animations': animations}
     export_user_extensions('gather_gltf_hook', export_settings, plan)
     active_scene_idx, scenes, animations = plan['active_scene_idx'], plan['scenes'], plan['animations']
+
+    # create buffer view objects
 
     if export_settings['gltf_draco_mesh_compression']:
         gltf2_io_draco_compression_extension.compress_scene_primitives(scenes, export_settings)

@@ -18,41 +18,20 @@ from io_scene_gltf2_adenflorian.io.com import gltf2_io
 from io_scene_gltf2_adenflorian.io.exp import gltf2_io_binary_data
 
 
-class Buffer:
+class AsoboBuffer:
     """Class representing binary data for use in a glTF file as 'buffer' property."""
 
     def __init__(self, buffer_index=0):
         self.__data = b""
         self.__buffer_index = buffer_index
 
-    def add_and_get_view(self, binary_data: gltf2_io_binary_data.BinaryData) -> gltf2_io.BufferView:
+    def append_data(self, binary_data: gltf2_io_binary_data.BinaryData) -> gltf2_io.BufferView:
         """Add binary data to the buffer. Return a glTF BufferView."""
         offset = len(self.__data)
         self.__data += binary_data.data
 
         # offsets should be a multiple of 4 --> therefore add padding if necessary
         padding = (4 - (binary_data.byte_length % 4)) % 4
-        self.__data += b"\x00" * padding
-
-        buffer_view = gltf2_io.BufferView(
-            buffer=self.__buffer_index,
-            byte_length=binary_data.byte_length,
-            byte_offset=offset,
-            byte_stride=None,
-            extensions=None,
-            extras=None,
-            name=None,
-            target=None
-        )
-        return buffer_view
-
-    def add(self, data) -> gltf2_io.BufferView:
-        """Add binary data to the buffer. Return a glTF BufferView."""
-        offset = len(self.__data)
-        self.__data += data
-
-        # offsets should be a multiple of 4 --> therefore add padding if necessary
-        padding = (4 - (len(data) % 4)) % 4
         self.__data += b"\x00" * padding
 
         return offset

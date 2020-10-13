@@ -251,6 +251,8 @@ def __gather_matrix(blender_object, export_settings):
 def __gather_mesh(blender_object, library, export_settings):
     if blender_object.type != "MESH":
         return None
+    if blender_object.name not in ['WING_LEFT_1', 'LIVERY_OFFICIAL_RUDDER']:
+        return None
 
     modifier_normal_types = [
         "NORMAL_EDIT",

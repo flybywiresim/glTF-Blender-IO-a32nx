@@ -157,6 +157,11 @@ def extract_primitives(glTF, blender_mesh, library, blender_object, blender_vert
     """
     print_console('INFO', 'Extracting primitive: ' + blender_mesh.name)
 
+    # if asobo_vertex_type == 'BLEND1':
+    #     asobo_weight_count = 1
+    # else:
+    #     asobo_weight_count = 4
+
     if blender_mesh.has_custom_normals:
         # Custom normals are all (0, 0, 0) until calling calc_normals_split() or calc_tangents().
         blender_mesh.calc_normals_split()
@@ -216,7 +221,8 @@ def extract_primitives(glTF, blender_mesh, library, blender_object, blender_vert
         primitive = {
             MATERIAL_ID: mat_idx,
             INDICES_ID: [],
-            ATTRIBUTES_ID: attributes
+            ATTRIBUTES_ID: attributes,
+            'VertexType': 'VTX',
         }
 
         material_idx_to_primitives[mat_idx] = primitive
@@ -281,6 +287,29 @@ def extract_primitives(glTF, blender_mesh, library, blender_object, blender_vert
             modifier = modifiers_dict["ARMATURE"]
             armature = modifier.object
 
+    for blender_polygon in blender_mesh.polygons:
+        if export_settings['gltf_materials'] is False:
+            primitive = material_idx_to_primitives[0]
+            vertex_index_to_new_indices = material_map[0]
+        elif not blender_polygon.material_index in material_idx_to_primitives:
+            primitive = material_idx_to_primitives[0]
+            vertex_index_to_new_indices = material_map[0]
+        else:
+            primitive = material_idx_to_primitives[blender_polygon.material_index]
+            vertex_index_to_new_indices = material_map[blender_polygon.material_index]
+        
+        if primitive['VertexType'] == 'BLEND4':
+            continue
+        else:
+            for vertex_index in blender_polygon.vertices:
+                vertex = blender_mesh.vertices[vertex_index]
+                weight_count = len(list(filter(lambda x: x.weight > 0, vertex.groups)))
+                if weight_count > 1:
+                    primitive['VertexType'] = 'BLEND4'
+                    break
+                elif weight_count == 1 and primitive['VertexType'] == 'VTX':
+                    primitive['VertexType'] = 'BLEND1'
+        
 
     #
     # Convert polygon to primitive indices and eliminate invalid ones. Assign to material.
@@ -464,14 +493,18 @@ def extract_primitives(glTF, blender_mesh, library, blender_object, blender_vert
 
                     for fill in range(0, 4 - len(joint)):
                         joint.append(0)
-                        weight.append(0.0)
+                        if primitive['VertexType'] == 'BLEND4':
+                            weight.append(0.0)
 
                     joints.append(joint)
                     weights.append(weight)
 
             for fill in range(0, bone_max - bone_count):
                 joints.append([0, 0, 0, 0])
-                weights.append([0.0, 0.0, 0.0, 0.0])
+                if primitive['VertexType'] == 'BLEND4':
+                    weights.append([0.0, 0.0, 0.0, 0.0])
+                else:
+                    weights.append([0.0])
 
             #
 
@@ -578,9 +611,14 @@ def extract_primitives(glTF, blender_mesh, library, blender_object, blender_vert
                             if attributes[joint_id][current_new_index * 4 + i] != joint[i]:
                                 found = False
                                 break
-                            if attributes[weight_id][current_new_index * 4 + i] != weight[i]:
-                                found = False
-                                break
+                            if primitive['VertexType'] == 'BLEND1':
+                                if attributes[weight_id][current_new_index] != weight[0]:
+                                    found = False
+                                    break
+                            else:
+                                if attributes[weight_id][current_new_index * 4 + i] != weight[i]:
+                                    found = False
+                                    break
 
                 if export_settings[gltf2_blender_export_keys.MORPH]:
                     for morph_index in range(0, morph_max):
@@ -631,6 +669,8 @@ def extract_primitives(glTF, blender_mesh, library, blender_object, blender_vert
 
             attributes[POSITION_ATTRIBUTE].extend(v)
             attributes[NORMAL_ATTRIBUTE].extend(n)
+            # Append a 0 to make the normal a Vec4
+            attributes[NORMAL_ATTRIBUTE].append(0)
             if use_tangents:
                 attributes[TANGENT_ATTRIBUTE].extend(t)
 
@@ -666,6 +706,9 @@ def extract_primitives(glTF, blender_mesh, library, blender_object, blender_vert
                     if attributes.get(weight_id) is None:
                         attributes[weight_id] = []
 
+                    # if asobo_vertex_type == 'BLEND1':
+                    #     attributes[weight_id].append(weights[bone_index][0])
+                    # else:
                     attributes[weight_id].extend(weights[bone_index])
 
             if export_settings[gltf2_blender_export_keys.MORPH]:

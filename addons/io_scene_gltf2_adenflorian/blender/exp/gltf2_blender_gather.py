@@ -35,8 +35,8 @@ def gather_gltf2(export_settings):
     active_scene = None
     for blender_scene in bpy.data.scenes:
         scenes.append(__gather_scene(blender_scene, export_settings))
-        if export_settings[gltf2_blender_export_keys.ANIMATIONS]:
-            animations += __gather_animations(blender_scene, export_settings)
+        # if export_settings[gltf2_blender_export_keys.ANIMATIONS]:
+        #     animations += __gather_animations(blender_scene, export_settings)
         if bpy.context.scene.name == blender_scene.name:
             active_scene = len(scenes) -1
     return active_scene, scenes, animations

@@ -68,10 +68,10 @@ def gather_primitives(
         primitive = gltf2_io.MeshPrimitive(
             attributes=internal_primitive['attributes'],
             extensions=None,
-            extras=None,
+            extras=internal_primitive['extras'],
             indices=internal_primitive['indices'],
             material=material,
-            mode=None,
+            mode=4,
             targets=internal_primitive['targets']
         )
         primitives.append(primitive)
@@ -92,19 +92,59 @@ def __gather_cache_primitives(
     """
     primitives = []
 
+    # if 'ASOBO_primitive' in blender_mesh:
+    #     asobo_primitive_info = {
+    #         "VertexType": blender_mesh['ASOBO_primitive']["VertexType"],
+    #         "VertexVersion": blender_mesh['ASOBO_primitive']["VertexVersion"]
+    #     }
+    # else:
+    #     # TODO This wont work for new skinned meshes
+    #     asobo_primitive_info = {
+    #         "VertexType": "VTX",
+    #         "VertexVersion": 2
+    #     }
+
     blender_primitives = gltf2_blender_extract.extract_primitives(
         None, blender_mesh, library, blender_object, vertex_groups, modifiers, export_settings)
 
     for internal_primitive in blender_primitives:
+        asobo_vertex_type = internal_primitive['VertexType']
         primitive = {
-            "attributes": __gather_attributes(internal_primitive, blender_mesh, modifiers, export_settings),
+            "attributes": __gather_attributes(internal_primitive, blender_mesh, modifiers, export_settings, asobo_vertex_type),
             "indices": __gather_indices(internal_primitive, blender_mesh, modifiers, export_settings),
             "material": internal_primitive['material'],
-            "targets": __gather_targets(internal_primitive, blender_mesh, modifiers, export_settings)
+            "targets": __gather_targets(internal_primitive, blender_mesh, modifiers, export_settings),
+            "extras": {
+                "ASOBO_primitive": {}
+            }
         }
+        primitive['extras']['ASOBO_primitive']['PrimitiveCount'] = primitive['indices'].count // 3
+        primitive['extras']['ASOBO_primitive']['VertexType'] = asobo_vertex_type
+        primitive['extras']['ASOBO_primitive']['VertexVersion'] = 2
         primitives.append(primitive)
 
+    if not any('BLEND' in x['extras']['ASOBO_primitive']['VertexType'] for x in primitives):
+        foo(primitives)
+
     return primitives
+
+def foo(primitives):
+    for attr in primitives[0]['attributes']:
+        bar(primitives, attr)
+
+def bar(primitives, attr):
+    acc = primitives[0]['attributes'][attr]
+    all = []
+    for prim in primitives:
+        all.extend(prim['attributes'][attr].buffer_view)
+    # all = [x for p in primitives for x in p['attributes'][attr].buffer_view]
+    acc.buffer_view = all
+    acc.count = len(all) // gltf2_io_constants.DataType.num_elements(acc.type)
+    acc.max = gltf2_blender_utils.max_components(all, acc.type)
+    acc.min = gltf2_blender_utils.min_components(all, acc.type)
+
+    for primitive in primitives:
+        primitive['attributes'][attr] = acc
 
 def __gather_indices(blender_primitive, blender_mesh, modifiers, export_settings):
     indices = blender_primitive['indices']
@@ -125,21 +165,35 @@ def __gather_indices(blender_primitive, blender_mesh, modifiers, export_settings
         return None
 
     element_type = gltf2_io_constants.DataType.Scalar
-    binary_data = gltf2_io_binary_data.BinaryData.from_list(indices, component_type)
-    return gltf2_blender_gather_accessors.gather_accessor(
-        binary_data,
-        component_type,
-        len(indices) // gltf2_io_constants.DataType.num_elements(element_type),
-        None,
-        None,
-        element_type,
-        'indicesAccessor',
-        export_settings
+    # binary_data = gltf2_io_binary_data.BinaryData.from_list(indices, component_type)
+    # return gltf2_blender_gather_accessors.gather_accessor(
+    #     indices,
+    #     component_type,
+    #     len(indices) // gltf2_io_constants.DataType.num_elements(element_type),
+    #     None,
+    #     None,
+    #     element_type,
+    #     'indicesAccessor',
+    #     export_settings
+    # )
+    return gltf2_io.Accessor(
+        buffer_view=indices,
+        byte_offset=None,
+        component_type=component_type,
+        count=len(indices),
+        extensions=None,
+        extras=None,
+        max=None,
+        min=None,
+        name=None,
+        normalized=None,
+        sparse=None,
+        type=element_type
     )
 
 
-def __gather_attributes(blender_primitive, blender_mesh, modifiers, export_settings):
-    return gltf2_blender_gather_primitive_attributes.gather_primitive_attributes(blender_primitive, export_settings)
+def __gather_attributes(blender_primitive, blender_mesh, modifiers, export_settings, asobo_vertex_type):
+    return gltf2_blender_gather_primitive_attributes.gather_primitive_attributes(blender_primitive, export_settings, asobo_vertex_type)
 
 
 def __gather_targets(blender_primitive, blender_mesh, modifiers, export_settings):
