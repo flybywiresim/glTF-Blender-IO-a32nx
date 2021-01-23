@@ -167,7 +167,7 @@ def do_primitives(gltf, mesh_idx, skin_idx, mesh, ob):
             indices = list(x + base_vertex_index for x in indices[start_index:(start_index + (tri_count * 3))])
 
         mode = 4 if prim.mode is None else prim.mode
-        points, edges, tris = points_edges_tris(mode, indices)
+        points, edges, tris = points_edges_tris(mode, indices, is_asobo_optimized)
         if points is not None:
             indices = points
         elif edges is not None:
@@ -184,7 +184,8 @@ def do_primitives(gltf, mesh_idx, skin_idx, mesh, ob):
         if has_normals:
             if 'NORMAL' in prim.attributes:
                 ns = BinaryData.decode_accessor(gltf, prim.attributes['NORMAL'], cache=True)
-                ns = np.array([i[0:3] for i in ns])
+                if is_asobo_optimized:
+                    ns = np.array([i[0:3] for i in ns])
                 ns = ns[unique_indices]
             else:
                 ns = np.zeros((len(unique_indices), 3), dtype=np.float32)
@@ -194,8 +195,9 @@ def do_primitives(gltf, mesh_idx, skin_idx, mesh, ob):
             if ('JOINTS_%d' % i) in prim.attributes and ('WEIGHTS_%d' % i) in prim.attributes:
                 js = BinaryData.decode_accessor(gltf, prim.attributes['JOINTS_%d' % i], cache=True)
                 ws = BinaryData.decode_accessor(gltf, prim.attributes['WEIGHTS_%d' % i], cache=True)
-                js = np.pad(js, (0, 4 - js.shape[1]))
-                ws = np.pad(ws, (0, 4 - ws.shape[1]))
+                if is_asobo_optimized:
+                    js = np.pad(js, (0, 4 - js.shape[1]))
+                    ws = np.pad(ws, (0, 4 - ws.shape[1]))
                 js = js[unique_indices]
                 ws = ws[unique_indices]
             else:
@@ -408,7 +410,7 @@ def do_primitives(gltf, mesh_idx, skin_idx, mesh, ob):
 
 
 
-def points_edges_tris(mode, indices):
+def points_edges_tris(mode, indices, is_asobo_optimized):
     points = None
     edges = None
     tris = None
@@ -451,10 +453,13 @@ def points_edges_tris(mode, indices):
         #   2     3
         #  / \   / \
         # 0---1 4---5
-        tris = np.array([
-            (indices[i + 2], indices[i + 1], indices[i])
-            for i in range(0, len(indices), 3)])
-        tris = squish(tris)
+        if is_asobo_optimized:
+            tris = np.array([
+                (indices[i + 2], indices[i + 1], indices[i])
+                for i in range(0, len(indices), 3)])
+            tris = squish(tris)
+        else:
+            tris = indices
 
     elif mode == 5:
         # TRIANGLE STRIP
