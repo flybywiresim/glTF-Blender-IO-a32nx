@@ -167,7 +167,7 @@ def mark_bones_and_armas(gltf):
         if gltf.vnodes[arma_id].type != VNode.Bone:
             gltf.vnodes[arma_id].type = VNode.Object
             gltf.vnodes[arma_id].is_arma = True
-            gltf.vnodes[arma_id].arma_name = skin.name or 'Armature'
+            gltf.vnodes[arma_id].arma_name = 'Armature'
 
         for joint in skin.joints:
             while joint != arma_id:

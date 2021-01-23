@@ -28,7 +28,7 @@ def simulate_stash(obj, track_name, action, start_frame=None):
         start_frame = bpy.context.scene.frame_start
     _strip = new_track.strips.new(action.name, start_frame, action)
     new_track.lock = True
-    new_track.mute = True
+    new_track.mute = False
 
 def restore_animation_on_object(obj, anim_name):
     if not getattr(obj, 'animation_data', None):

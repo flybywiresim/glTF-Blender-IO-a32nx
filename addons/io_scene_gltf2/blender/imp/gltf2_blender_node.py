@@ -115,6 +115,7 @@ class BlenderNode():
     def create_bones(gltf, arma_id):
         arma = gltf.vnodes[arma_id]
         blender_arma = arma.blender_object
+        blender_arma.show_in_front = True
         armature = blender_arma.data
 
         # Find all bones for this arma
