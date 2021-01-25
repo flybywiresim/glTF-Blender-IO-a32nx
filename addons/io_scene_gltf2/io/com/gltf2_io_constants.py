@@ -35,12 +35,35 @@ class ComponentType(IntEnum):
         }[component_type]
 
     @classmethod
+    def to_type_code_asobo(cls, component_type):
+        return {
+            ComponentType.Byte: 'b',
+            ComponentType.UnsignedByte: 'B',
+            ComponentType.Short: 'e', # Asobo uses a float16 for shorts instead of int16
+            ComponentType.UnsignedShort: 'H',
+            ComponentType.UnsignedInt: 'I',
+            ComponentType.Float: 'f'
+        }[component_type]
+
+    @classmethod
     def to_numpy_dtype(cls, component_type):
         import numpy as np
         return {
             ComponentType.Byte: np.int8,
             ComponentType.UnsignedByte: np.uint8,
             ComponentType.Short: np.int16,
+            ComponentType.UnsignedShort: np.uint16,
+            ComponentType.UnsignedInt: np.uint32,
+            ComponentType.Float: np.float32,
+        }[component_type]
+
+    @classmethod
+    def to_numpy_dtype_asobo(cls, component_type):
+        import numpy as np
+        return {
+            ComponentType.Byte: np.int8,
+            ComponentType.UnsignedByte: np.uint8,
+            ComponentType.Short: np.float16, # Asobo uses a float16 for shorts instead of int16
             ComponentType.UnsignedShort: np.uint16,
             ComponentType.UnsignedInt: np.uint32,
             ComponentType.Float: np.float32,

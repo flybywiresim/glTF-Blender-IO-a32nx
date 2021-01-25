@@ -73,13 +73,13 @@ class BinaryData():
         return data
 
     @staticmethod
-    def decode_accessor(gltf, accessor_idx, cache=False):
+    def decode_accessor(gltf, accessor_idx, is_asobo_optimized=False, cache=False):
         """Decodes accessor to 2D numpy array (count x num_components)."""
         if accessor_idx in gltf.decode_accessor_cache:
             return gltf.accessor_cache[accessor_idx]
 
         accessor = gltf.data.accessors[accessor_idx]
-        array = BinaryData.decode_accessor_obj(gltf, accessor)
+        array = BinaryData.decode_accessor_obj(gltf, accessor, is_asobo_optimized)
 
         if cache:
             gltf.accessor_cache[accessor_idx] = array
@@ -89,12 +89,15 @@ class BinaryData():
         return array
 
     @staticmethod
-    def decode_accessor_obj(gltf, accessor):
+    def decode_accessor_obj(gltf, accessor, is_asobo_optimized):
         # MAT2/3 have special alignment requirements that aren't handled. But it
         # doesn't matter because nothing uses them.
         assert accessor.type not in ['MAT2', 'MAT3']
 
-        dtype = ComponentType.to_numpy_dtype(accessor.component_type)
+        if is_asobo_optimized: # Asobo changes some of the data types
+            dtype = ComponentType.to_numpy_dtype_asobo(accessor.component_type)
+        else:
+            dtype = ComponentType.to_numpy_dtype(accessor.component_type)
         component_nb = DataType.num_elements(accessor.type)
 
         if accessor.buffer_view is not None:
@@ -149,7 +152,7 @@ class BinaryData():
                 'componentType': accessor.sparse.indices.component_type,
                 'type': 'SCALAR',
             })
-            sparse_indices = BinaryData.decode_accessor_obj(gltf, sparse_indices_obj)
+            sparse_indices = BinaryData.decode_accessor_obj(gltf, sparse_indices_obj, is_optimized)
             sparse_indices = sparse_indices.reshape(len(sparse_indices))
 
             sparse_values_obj = Accessor.from_dict({
@@ -159,7 +162,7 @@ class BinaryData():
                 'componentType': accessor.component_type,
                 'type': accessor.type,
             })
-            sparse_values = BinaryData.decode_accessor_obj(gltf, sparse_values_obj)
+            sparse_values = BinaryData.decode_accessor_obj(gltf, sparse_values_obj, is_optimized)
 
             if not array.flags.writeable:
                 array = array.copy()

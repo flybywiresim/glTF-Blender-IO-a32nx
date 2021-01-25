@@ -157,7 +157,7 @@ def do_primitives(gltf, mesh_idx, skin_idx, mesh, ob):
             decode_primitive(gltf, prim)
 
         if prim.indices is not None:
-            indices = BinaryData.decode_accessor(gltf, prim.indices)
+            indices = BinaryData.decode_accessor(gltf, prim.indices, is_asobo_optimized=is_asobo_optimized)
             indices = indices.reshape(len(indices))
         else:
             num_verts = gltf.data.accessors[prim.attributes['POSITION']].count
@@ -178,12 +178,12 @@ def do_primitives(gltf, mesh_idx, skin_idx, mesh, ob):
         # We'll add one vert to the arrays for each index used in indices
         unique_indices, inv_indices = np.unique(indices, return_inverse=True)
 
-        vs = BinaryData.decode_accessor(gltf, prim.attributes['POSITION'], cache=True)
+        vs = BinaryData.decode_accessor(gltf, prim.attributes['POSITION'], is_asobo_optimized=is_asobo_optimized, cache=True)
         vert_locs = np.concatenate((vert_locs, vs[unique_indices]))
 
         if has_normals:
             if 'NORMAL' in prim.attributes:
-                ns = BinaryData.decode_accessor(gltf, prim.attributes['NORMAL'], cache=True)
+                ns = BinaryData.decode_accessor(gltf, prim.attributes['NORMAL'], is_asobo_optimized=is_asobo_optimized, cache=True)
                 if is_asobo_optimized:
                     ns = np.array([i[0:3] for i in ns])
                 ns = ns[unique_indices]
@@ -193,8 +193,8 @@ def do_primitives(gltf, mesh_idx, skin_idx, mesh, ob):
 
         for i in range(num_joint_sets):
             if ('JOINTS_%d' % i) in prim.attributes and ('WEIGHTS_%d' % i) in prim.attributes:
-                js = BinaryData.decode_accessor(gltf, prim.attributes['JOINTS_%d' % i], cache=True)
-                ws = BinaryData.decode_accessor(gltf, prim.attributes['WEIGHTS_%d' % i], cache=True)
+                js = BinaryData.decode_accessor(gltf, prim.attributes['JOINTS_%d' % i], is_asobo_optimized=is_asobo_optimized, cache=True)
+                ws = BinaryData.decode_accessor(gltf, prim.attributes['WEIGHTS_%d' % i], is_asobo_optimized=is_asobo_optimized, cache=True)
                 if is_asobo_optimized:
                     js = np.pad(js, (0, 4 - js.shape[1]))
                     ws = np.pad(ws, (0, 4 - ws.shape[1]))
@@ -209,7 +209,7 @@ def do_primitives(gltf, mesh_idx, skin_idx, mesh, ob):
         for morph_i, target in enumerate(prim.targets or []):
             if pymesh.shapekey_names[morph_i] is None:
                 continue
-            morph_vs = BinaryData.decode_accessor(gltf, target['POSITION'], cache=True)
+            morph_vs = BinaryData.decode_accessor(gltf, target['POSITION'], is_asobo_optimized=is_asobo_optimized, cache=True)
             morph_vs = morph_vs[unique_indices]
             sk_vert_locs[morph_i] = np.concatenate((sk_vert_locs[morph_i], morph_vs))
 
@@ -229,7 +229,7 @@ def do_primitives(gltf, mesh_idx, skin_idx, mesh, ob):
 
             for uv_i in range(num_uvs):
                 if ('TEXCOORD_%d' % uv_i) in prim.attributes:
-                    uvs = BinaryData.decode_accessor(gltf, prim.attributes['TEXCOORD_%d' % uv_i], cache=True)
+                    uvs = BinaryData.decode_accessor(gltf, prim.attributes['TEXCOORD_%d' % uv_i], is_asobo_optimized=is_asobo_optimized, cache=True)
                     uvs = uvs[indices]
                 else:
                     uvs = np.zeros((len(indices), 2), dtype=np.float32)
@@ -237,7 +237,7 @@ def do_primitives(gltf, mesh_idx, skin_idx, mesh, ob):
 
             for col_i in range(num_cols):
                 if ('COLOR_%d' % col_i) in prim.attributes:
-                    cols = BinaryData.decode_accessor(gltf, prim.attributes['COLOR_%d' % col_i], cache=True)
+                    cols = BinaryData.decode_accessor(gltf, prim.attributes['COLOR_%d' % col_i], is_asobo_optimized=is_asobo_optimized, cache=True)
                     cols = cols[indices]
                     if cols.shape[1] == 3:
                         cols = colors_rgb_to_rgba(cols)
