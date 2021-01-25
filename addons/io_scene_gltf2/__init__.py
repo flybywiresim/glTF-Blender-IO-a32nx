@@ -1098,10 +1098,18 @@ classes = (
     ImportGLTF2
 )
 
+from io_scene_gltf2.blender.com import gltf2_blender_flight_sim_material_ui, gltf2_blender_flight_sim_material_properties
+
+modules = (
+    gltf2_blender_flight_sim_material_ui,
+    gltf2_blender_flight_sim_material_properties
+)
 
 def register():
     for c in classes:
         bpy.utils.register_class(c)
+    for m in modules:
+        m.register()
     # bpy.utils.register_module(__name__)
 
     # add to the export / import menu
@@ -1112,6 +1120,8 @@ def register():
 def unregister():
     for c in classes:
         bpy.utils.unregister_class(c)
+    for m in modules:
+        m.unregister()
     for f in extension_panel_unregister_functors:
         f()
     extension_panel_unregister_functors.clear()
