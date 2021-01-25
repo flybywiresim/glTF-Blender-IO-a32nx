@@ -55,10 +55,6 @@ class BlenderScene():
             for anim_idx in reversed(range(len(gltf.data.animations))):
                 BlenderAnimation.anim(gltf, anim_idx)
 
-            # Restore first animation
-            anim_name = gltf.data.animations[0].track_name
-            BlenderAnimation.restore_animation(gltf, anim_name)
-
     @staticmethod
     def select_imported_objects(gltf):
         """Select all (and only) the imported objects."""
