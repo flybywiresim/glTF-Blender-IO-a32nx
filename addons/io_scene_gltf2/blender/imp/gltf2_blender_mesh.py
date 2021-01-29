@@ -1,4 +1,4 @@
-# Copyright 2018-2021 The glTF-Blender-IO authors.
+# Copyright 2018-2021 The glTF-Blender-IO authors, FlyByWire Simulations.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -372,7 +372,10 @@ def do_primitives(gltf, mesh_idx, skin_idx, mesh, ob):
             if prim.material is not None:
                 # Get the material
                 pymaterial = gltf.data.materials[prim.material]
-                vertex_color = 'COLOR_0' if 'COLOR_0' in prim.attributes else None
+                if is_asobo_optimized: # vertex color for msfs imports makes things look quite weird, so we aren't going to use it
+                    vertex_color = None
+                else:
+                    vertex_color = 'COLOR_0' if 'COLOR_0' in prim.attributes else None
                 if vertex_color not in pymaterial.blender_material:
                     BlenderMaterial.create(gltf, prim.material, vertex_color)
                 material_name = pymaterial.blender_material[vertex_color]

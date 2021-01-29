@@ -1,4 +1,4 @@
-# Copyright 2018-2021 The glTF-Blender-IO authors.
+# Copyright 2018-2021 The glTF-Blender-IO authors, FlyByWire Simulations.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -43,9 +43,17 @@ def texture(
     tex_img.location = x - 240, y
     tex_img.label = label
     # Get image
-    if pytexture.source is not None:
-        BlenderImage.create(mh.gltf, pytexture.source)
-        pyimg = mh.gltf.data.images[pytexture.source]
+    source = pytexture.source
+    is_dds = False
+    if source is None:
+        try:
+            source = pytexture.extensions['MSFT_texture_dds']['source']
+            is_dds = True
+        except Exception:
+            pass
+    if source is not None:
+        BlenderImage.create(mh.gltf, source, is_dds, label)
+        pyimg = mh.gltf.data.images[source]
         blender_image_name = pyimg.blender_image_name
         if blender_image_name:
             tex_img.image = bpy.data.images[blender_image_name]

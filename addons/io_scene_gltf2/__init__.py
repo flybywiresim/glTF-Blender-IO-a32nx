@@ -1,4 +1,4 @@
-# Copyright 2018-2021 The glTF-Blender-IO authors.
+# Copyright 2018-2021 The glTF-Blender-IO authors, FlyByWire Simulations.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -59,8 +59,9 @@ from bpy.props import (StringProperty,
                        EnumProperty,
                        IntProperty,
                        CollectionProperty)
-from bpy.types import Operator
+from bpy.types import Operator, AddonPreferences
 from bpy_extras.io_utils import ImportHelper, ExportHelper
+import pathlib
 
 
 #
@@ -1006,6 +1007,14 @@ class ImportGLTF2(Operator, ImportHelper):
         default=False,
     )
 
+    include_sim_textures: BoolProperty(
+        name='Include Flight Simulator textures',
+        description='Searches for textures used in the file in the Flight Simulator '
+                    'install directory. This setting is only used if importing a '
+                    'file from outside of the simulator directory',
+        default=True,
+    )
+
     def draw(self, context):
         layout = self.layout
 
@@ -1017,6 +1026,7 @@ class ImportGLTF2(Operator, ImportHelper):
         layout.prop(self, 'import_shading')
         layout.prop(self, 'guess_original_bind_pose')
         layout.prop(self, 'bone_heuristic')
+        layout.prop(self, 'include_sim_textures')
 
     def execute(self, context):
         return self.import_gltf2(context)
@@ -1026,6 +1036,7 @@ class ImportGLTF2(Operator, ImportHelper):
 
         self.set_debug_log()
         import_settings = self.as_keywords()
+        addon_settings = context.preferences.addons[__name__].preferences
 
         if self.files:
             # Multiple file import
@@ -1033,20 +1044,20 @@ class ImportGLTF2(Operator, ImportHelper):
             dirname = os.path.dirname(self.filepath)
             for file in self.files:
                 path = os.path.join(dirname, file.name)
-                if self.unit_import(path, import_settings) == {'FINISHED'}:
+                if self.unit_import(path, import_settings, addon_settings) == {'FINISHED'}:
                     ret = {'FINISHED'}
             return ret
         else:
             # Single file import
-            return self.unit_import(self.filepath, import_settings)
+            return self.unit_import(self.filepath, import_settings, addon_settings)
 
-    def unit_import(self, filename, import_settings):
+    def unit_import(self, filename, import_settings, addon_settings):
         import time
         from .io.imp.gltf2_io_gltf import glTFImporter, ImportError
         from .blender.imp.gltf2_blender_gltf import BlenderGlTF
 
         try:
-            gltf_importer = glTFImporter(filename, import_settings)
+            gltf_importer = glTFImporter(filename, import_settings, addon_settings)
             gltf_importer.read()
             gltf_importer.checks()
 
@@ -1078,7 +1089,70 @@ class ImportGLTF2(Operator, ImportHelper):
         else:
             self.loglevel = logging.NOTSET
 
+class ImporterExporterPreferences(AddonPreferences):
+    bl_idname = __name__
 
+    texconv_file: StringProperty(
+        name='Folder path',
+        description='Absolute path to Microsoft texconv tool',
+        default='',
+        subtype='FILE_PATH',
+    )
+
+    texture_output_dir: StringProperty(
+        name='Folder path',
+        description='Location where converted textures are saved',
+        default='',
+        subtype='DIR_PATH',
+    )
+
+    flight_sim_dir: StringProperty(
+        name='Folder path',
+        description='Absolute path to the Flight Simulator installation '
+                    '(where your Community and Official folders are)',
+        default='',
+        subtype='DIR_PATH'
+    )
+    
+    def draw(self, context):
+        layout = self.layout
+        box = layout.box()
+        print('bruh')
+
+        # texconv
+        row = box.row()
+        row.label(text='Microsoft Texconv Tool')
+        row = box.row()
+        row.label(text = 'This tool automatically converts DDS images for usage '
+                        'in Blender')
+        row = box.row()
+        row.operator('wm.url_open', text="Download texconv.exe").url = 'https://github.com/microsoft/DirectXTex/releases/latest/download/texconv.exe'
+        row = box.row()
+        row.prop(self, 'texconv_file', text = 'Path to texconv.exe')
+
+        texconv_path = pathlib.Path(self.texconv_file)
+        if self.texconv_file == '' or not texconv_path.exists():
+            row = box.row()
+            row.label(text='No texconv.exe file has been selected. Texture import is disabled', icon='ERROR')
+
+        # Texture output directory
+        box = layout.box()
+        row = box.row()
+        row.prop(self, 'texture_output_dir', text = 'Path for converted textures')
+        texture_path = pathlib.Path(self.texture_output_dir)
+        if self.texture_output_dir == '' or not texture_path.exists() or not texture_path.is_dir():
+            row = box.row()
+            row.label(text='No valid texture output directory entered. Texture import is disabled', icon='ERROR')
+
+        # Flight simulator installation directory
+        box = layout.box()
+        row = box.row()
+        row.prop(self, 'flight_sim_dir', text='Path to Flight Simulator (root level)')
+        flightsim_path = pathlib.Path(self.flight_sim_dir)
+        if self.flight_sim_dir == '' or not flightsim_path.exists() or not flightsim_path.is_dir():
+            row = box.row()
+            row.label(text='No valid Flight Simulator path entered. Texture import is disabled', icon='ERROR')
+    
 def menu_func_import(self, context):
     self.layout.operator(ImportGLTF2.bl_idname, text='glTF 2.0 (.glb/.gltf)')
 
@@ -1095,7 +1169,8 @@ classes = (
     GLTF_PT_export_animation_shapekeys,
     GLTF_PT_export_animation_skinning,
     GLTF_PT_export_user_extensions,
-    ImportGLTF2
+    ImportGLTF2,
+    ImporterExporterPreferences
 )
 
 from io_scene_gltf2.blender.com import gltf2_blender_flight_sim_material_ui, gltf2_blender_flight_sim_material_properties

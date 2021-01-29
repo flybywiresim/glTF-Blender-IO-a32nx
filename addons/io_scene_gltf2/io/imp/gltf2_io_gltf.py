@@ -1,4 +1,4 @@
-# Copyright 2018-2021 The glTF-Blender-IO authors.
+# Copyright 2018-2021 The glTF-Blender-IO authors, FlyByWire Simulations.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,14 +30,16 @@ class ImportError(RuntimeError):
 class glTFImporter():
     """glTF Importer class."""
 
-    def __init__(self, filename, import_settings):
+    def __init__(self, filename, import_settings, addon_settings):
         """initialization."""
         self.filename = filename
         self.import_settings = import_settings
+        self.addon_settings = addon_settings
         self.glb_buffer = None
         self.buffers = {}
         self.accessor_cache = {}
         self.decode_accessor_cache = {}
+        self.texture_path_cache = []
 
         if 'loglevel' not in self.import_settings.keys():
             self.import_settings['loglevel'] = logging.ERROR
