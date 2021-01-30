@@ -1117,7 +1117,6 @@ class ImporterExporterPreferences(AddonPreferences):
     def draw(self, context):
         layout = self.layout
         box = layout.box()
-        print('bruh')
 
         # texconv
         row = box.row()
