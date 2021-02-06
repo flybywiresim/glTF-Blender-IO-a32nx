@@ -128,6 +128,8 @@ def do_primitives(gltf, mesh_idx, skin_idx, mesh, ob):
         for _ in range(num_shapekeys)
     ]
 
+    is_asobo_optimized = None
+
     for prim in pymesh.primitives:
         prim.num_faces = 0
 
@@ -400,7 +402,7 @@ def do_primitives(gltf, mesh_idx, skin_idx, mesh, ob):
     # Normals
 
     # Set polys smooth/flat
-    set_poly_smoothing(gltf, pymesh, mesh, vert_normals, loop_vidxs)
+    set_poly_smoothing(gltf, pymesh, mesh, vert_normals, loop_vidxs, is_asobo_optimized)
 
     mesh.validate()
     has_loose_edges = len(edge_vidxs) != 0  # need to calc_loose_edges for them to show up
@@ -409,7 +411,8 @@ def do_primitives(gltf, mesh_idx, skin_idx, mesh, ob):
     if has_normals:
         mesh.create_normals_split()
         mesh.normals_split_custom_set_from_vertices(vert_normals)
-        #mesh.use_auto_smooth = True doesn't seem to properly work for MSFS imports
+        if not is_asobo_optimized: # doesn't seem to properly work for MSFS imports
+            mesh.use_auto_smooth = True
 
 
 
@@ -578,23 +581,37 @@ def normalize_vecs(vectors):
     np.divide(vectors, norms, out=vectors, where=norms != 0)
 
 
-def set_poly_smoothing(gltf, pymesh, mesh, vert_normals, loop_vidxs):
+def set_poly_smoothing(gltf, pymesh, mesh, vert_normals, loop_vidxs, is_asobo_optimized):
     num_polys = len(mesh.polygons)
 
     if gltf.import_settings['import_shading'] == "FLAT":
         # Polys are flat by default; don't have to do anything
         return
 
-    if gltf.import_settings['import_shading'] == "NORMALS" or gltf.import_settings['import_shading'] == "SMOOTH": # Normals shading normally shouldn't use smooth shading, but auto smooth doesn't work right for some reason, so we use shade smooth.
-        poly_smooths = np.full(num_polys, True)
-        f = 0
-        for prim in pymesh.primitives:
-            if 'NORMAL' not in prim.attributes:
-                # Primitives with no NORMALs should use flat shading
-                poly_smooths[f:f + prim.num_faces].fill(False)
-            f += prim.num_faces
-        mesh.polygons.foreach_set('use_smooth', poly_smooths)
-        return
+    if is_asobo_optimized:
+        if gltf.import_settings['import_shading'] == "NORMALS" or gltf.import_settings['import_shading'] == "SMOOTH": # Normals shading normally shouldn't use smooth shading, but auto smooth doesn't work right for some reason, so we use shade smooth.
+            poly_smooths = np.full(num_polys, True)
+            f = 0
+            for prim in pymesh.primitives:
+                if 'NORMAL' not in prim.attributes:
+                    # Primitives with no NORMALs should use flat shading
+                    poly_smooths[f:f + prim.num_faces].fill(False)
+                f += prim.num_faces
+            mesh.polygons.foreach_set('use_smooth', poly_smooths)
+            return
+    else:
+        if gltf.import_settings['import_shading'] == "SMOOTH":
+            poly_smooths = np.full(num_polys, True)
+            f = 0
+            for prim in pymesh.primitives:
+                if 'NORMAL' not in prim.attributes:
+                    # Primitives with no NORMALs should use flat shading
+                    poly_smooths[f:f + prim.num_faces].fill(False)
+                f += prim.num_faces
+            mesh.polygons.foreach_set('use_smooth', poly_smooths)
+            return
+
+        assert gltf.import_settings['import_shading'] == "NORMALS"
 
 
     # Try to guess which polys should be flat based on the fact that all the
