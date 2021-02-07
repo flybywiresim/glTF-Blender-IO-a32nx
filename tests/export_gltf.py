@@ -39,7 +39,7 @@ try:
         'export_format': ('GLB' if extension == '.glb' else 'GLTF_SEPARATE'),
         'filepath': os.path.join(output_dir, path_parts[1]),
     }
-    bpy.ops.export_scene.gltf(**args)
+    bpy.ops.export_scene.gltf_msfs(**args)
 except Exception as err:
     print(err, file=sys.stderr)
     sys.exit(1)

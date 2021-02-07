@@ -10,7 +10,7 @@
       <h>300</h>
     </coordinates>
     <panel_attributes>type=Package
-io_scene_gltf2
+io_scene_gltf2_msfs
 	blender
 		com
 		exp

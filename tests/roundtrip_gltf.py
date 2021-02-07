@@ -28,7 +28,7 @@ try:
     bpy.ops.object.select_all(action='SELECT')
     bpy.ops.object.delete(use_global=False)
 
-    bpy.ops.import_scene.gltf(filepath=argv[0])
+    bpy.ops.import_scene.gltf_msfs(filepath=argv[0])
 
     extension = '.gltf'
     export_format = 'GLTF_SEPARATE'
@@ -42,9 +42,9 @@ try:
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     if '--no-sample-anim' in argv:
-        bpy.ops.export_scene.gltf(export_format=export_format, filepath=os.path.join(output_dir, path_parts[1]), export_force_sampling=False)
+        bpy.ops.export_scene.gltf_msfs(export_format=export_format, filepath=os.path.join(output_dir, path_parts[1]), export_force_sampling=False)
     else:
-        bpy.ops.export_scene.gltf(export_format=export_format, filepath=os.path.join(output_dir, path_parts[1]))
+        bpy.ops.export_scene.gltf_msfs(export_format=export_format, filepath=os.path.join(output_dir, path_parts[1]))
 except Exception as err:
     print(err, file=sys.stderr)
     sys.exit(1)

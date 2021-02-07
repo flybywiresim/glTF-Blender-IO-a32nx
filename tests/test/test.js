@@ -38,7 +38,7 @@ const validator_info_keys = [
 
 function blenderFileToGltf(blenderVersion, blenderPath, outDirName, done, options='') {
     const { exec } = require('child_process');
-    const cmd = `${blenderVersion} -b --addons io_scene_gltf2 -noaudio ${blenderPath} --python export_gltf.py -- ${outDirName} ${options}`;
+    const cmd = `${blenderVersion} -b --addons io_scene_gltf2_msfs -noaudio ${blenderPath} --python export_gltf.py -- ${outDirName} ${options}`;
     var prc = exec(cmd, (error, stdout, stderr) => {
         //if (stderr) process.stderr.write(stderr);
 
@@ -52,7 +52,7 @@ function blenderFileToGltf(blenderVersion, blenderPath, outDirName, done, option
 
 function blenderRoundtripGltf(blenderVersion, gltfPath, outDirName, done, options='') {
     const { exec } = require('child_process');
-    const cmd = `${blenderVersion} -b --addons io_scene_gltf2 -noaudio --python roundtrip_gltf.py -- ${gltfPath} ${outDirName} ${options}`;
+    const cmd = `${blenderVersion} -b --addons io_scene_gltf2_msfs -noaudio --python roundtrip_gltf.py -- ${gltfPath} ${outDirName} ${options}`;
     var prc = exec(cmd, (error, stdout, stderr) => {
         //if (stderr) process.stderr.write(stderr);
 
