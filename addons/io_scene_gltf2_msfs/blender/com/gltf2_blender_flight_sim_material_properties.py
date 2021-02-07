@@ -17,683 +17,680 @@ from bpy.types import Material, Panel, PropertyGroup, Image
 from bpy.props import EnumProperty, FloatVectorProperty, FloatProperty, IntProperty, BoolProperty, PointerProperty
 
 def updateMaterial(self, context):
-    mat = context.active_object.active_material
+    if self.msfs_material_type == "msfs_standard": # Standard
+        # Properties
+        self.msfs_show_colors = True
+        self.msfs_show_emissive_color = True
 
-    if mat is not None:
-        if mat.msfs_material_type == "msfs_standard": # Standard
-            # Properties
-            mat.msfs_show_colors = True
-            mat.msfs_show_emissive_color = True
+        self.msfs_show_alpha_mode = True
 
-            mat.msfs_show_alpha_mode = True
+        self.msfs_show_render_options = True
+        self.msfs_show_day_night_cycle = True
 
-            mat.msfs_show_render_options = True
-            mat.msfs_show_day_night_cycle = True
+        self.msfs_show_pearl = True
 
-            mat.msfs_show_pearl = True
+        self.msfs_show_gameplay_options = True
 
-            mat.msfs_show_gameplay_options = True
+        self.msfs_show_uv_options = True
 
-            mat.msfs_show_uv_options = True
+        self.msfs_show_material_options = True
+        self.msfs_show_material_detail_options = True
+        self.msfs_show_blend_threshold = True
 
-            mat.msfs_show_material_options = True
-            mat.msfs_show_material_detail_options = True
-            mat.msfs_show_blend_threshold = True
+        self.msfs_show_decal_blend_factors = False
 
-            mat.msfs_show_decal_blend_factors = False
+        self.msfs_show_windshield_options = False
 
-            mat.msfs_show_windshield_options = False
+        self.msfs_show_glass_options = False
 
-            mat.msfs_show_glass_options = False
+        self.msfs_show_parallax_options = False
 
-            mat.msfs_show_parallax_options = False
+        self.msfs_show_sss_color = False
 
-            mat.msfs_show_sss_color = False
+        self.msfs_show_fresnel_options = False
 
-            mat.msfs_show_fresnel_options = False
+        # Textures
+        Material.msfs_show_base_color_texture = True
+        Material.msfs_show_comp_texture = True
+        Material.msfs_show_normal_texture = True
+        Material.msfs_show_emissive_texture = True
+        Material.msfs_show_detail_color_texture = True
+        Material.msfs_show_detail_comp_texture = True
+        Material.msfs_show_detail_normal_texture = True
+        Material.msfs_show_blend_mask_texture = True
+        Material.msfs_show_wetness_ao_texture = False
+        Material.msfs_show_dirt_texture = False
+        Material.msfs_show_height_map_texture = False
+        
+    elif self.msfs_material_type == "msfs_decal": # Decal
+        # Properties
+        self.msfs_show_colors = True
+        self.msfs_show_emissive_color = True
 
-            # Textures
-            Material.msfs_show_base_color_texture = True
-            Material.msfs_show_comp_texture = True
-            Material.msfs_show_normal_texture = True
-            Material.msfs_show_emissive_texture = True
-            Material.msfs_show_detail_color_texture = True
-            Material.msfs_show_detail_comp_texture = True
-            Material.msfs_show_detail_normal_texture = True
-            Material.msfs_show_blend_mask_texture = True
-            Material.msfs_show_wetness_ao_texture = False
-            Material.msfs_show_dirt_texture = False
-            Material.msfs_show_height_map_texture = False
-            
-        elif mat.msfs_material_type == "msfs_decal": # Decal
-            # Properties
-            mat.msfs_show_colors = True
-            mat.msfs_show_emissive_color = True
+        self.msfs_show_alpha_mode = False
 
-            mat.msfs_show_alpha_mode = False
+        self.msfs_show_render_options = True
+        self.msfs_show_day_night_cycle = False
 
-            mat.msfs_show_render_options = True
-            mat.msfs_show_day_night_cycle = False
+        self.msfs_show_pearl = True
 
-            mat.msfs_show_pearl = True
+        self.msfs_show_gameplay_options = True
 
-            mat.msfs_show_gameplay_options = True
+        self.msfs_show_uv_options = True
 
-            mat.msfs_show_uv_options = True
+        self.msfs_show_material_options = True
+        self.msfs_show_material_detail_options = True
+        self.msfs_show_blend_threshold = True
 
-            mat.msfs_show_material_options = True
-            mat.msfs_show_material_detail_options = True
-            mat.msfs_show_blend_threshold = True
+        self.msfs_show_decal_blend_factors = True
 
-            mat.msfs_show_decal_blend_factors = True
+        self.msfs_show_windshield_options = False
 
-            mat.msfs_show_windshield_options = False
+        self.msfs_show_glass_options = False
 
-            mat.msfs_show_glass_options = False
+        self.msfs_show_parallax_options = False
 
-            mat.msfs_show_parallax_options = False
+        self.msfs_show_sss_color = False
 
-            mat.msfs_show_sss_color = False
+        self.msfs_show_fresnel_options = False
 
-            mat.msfs_show_fresnel_options = False
+        # Textures
+        Material.msfs_show_base_color_texture = True
+        Material.msfs_show_comp_texture = True
+        Material.msfs_show_normal_texture = True
+        Material.msfs_show_emissive_texture = True
+        Material.msfs_show_detail_color_texture = True
+        Material.msfs_show_detail_comp_texture = True
+        Material.msfs_show_detail_normal_texture = True
+        Material.msfs_show_blend_mask_texture = True
+        Material.msfs_show_wetness_ao_texture = False
+        Material.msfs_show_dirt_texture = False
+        Material.msfs_show_height_map_texture = False
 
-            # Textures
-            Material.msfs_show_base_color_texture = True
-            Material.msfs_show_comp_texture = True
-            Material.msfs_show_normal_texture = True
-            Material.msfs_show_emissive_texture = True
-            Material.msfs_show_detail_color_texture = True
-            Material.msfs_show_detail_comp_texture = True
-            Material.msfs_show_detail_normal_texture = True
-            Material.msfs_show_blend_mask_texture = True
-            Material.msfs_show_wetness_ao_texture = False
-            Material.msfs_show_dirt_texture = False
-            Material.msfs_show_height_map_texture = False
+    elif self.msfs_material_type == "msfs_windshield": # Windshield
+        # Properties
+        self.msfs_show_colors = True
+        self.msfs_show_emissive_color = True
 
-        elif mat.msfs_material_type == "msfs_windshield": # Windshield
-            # Properties
-            mat.msfs_show_colors = True
-            mat.msfs_show_emissive_color = True
+        self.msfs_show_alpha_mode = False
 
-            mat.msfs_show_alpha_mode = False
+        self.msfs_show_render_options = True
+        self.msfs_show_day_night_cycle = False
 
-            mat.msfs_show_render_options = True
-            mat.msfs_show_day_night_cycle = False
+        self.msfs_show_pearl = True
 
-            mat.msfs_show_pearl = True
+        self.msfs_show_gameplay_options = True
 
-            mat.msfs_show_gameplay_options = True
+        self.msfs_show_uv_options = True
 
-            mat.msfs_show_uv_options = True
+        self.msfs_show_material_options = True
+        self.msfs_show_material_detail_options = True
+        self.msfs_show_blend_threshold = True
 
-            mat.msfs_show_material_options = True
-            mat.msfs_show_material_detail_options = True
-            mat.msfs_show_blend_threshold = True
+        self.msfs_show_decal_blend_factors = False
 
-            mat.msfs_show_decal_blend_factors = False
+        self.msfs_show_windshield_options = True
 
-            mat.msfs_show_windshield_options = True
+        self.msfs_show_glass_options = False
 
-            mat.msfs_show_glass_options = False
+        self.msfs_show_parallax_options = False
 
-            mat.msfs_show_parallax_options = False
+        self.msfs_show_sss_color = False
 
-            mat.msfs_show_sss_color = False
+        self.msfs_show_fresnel_options = False
 
-            mat.msfs_show_fresnel_options = False
+        # Textures
+        Material.msfs_show_base_color_texture = True
+        Material.msfs_show_comp_texture = True
+        Material.msfs_show_normal_texture = True
+        Material.msfs_show_emissive_texture = True
+        Material.msfs_show_detail_color_texture = True
+        Material.msfs_show_detail_comp_texture = True
+        Material.msfs_show_detail_normal_texture = True
+        Material.msfs_show_blend_mask_texture = True
+        Material.msfs_show_wetness_ao_texture = True
+        Material.msfs_show_dirt_texture = False
+        Material.msfs_show_height_map_texture = False
 
-            # Textures
-            Material.msfs_show_base_color_texture = True
-            Material.msfs_show_comp_texture = True
-            Material.msfs_show_normal_texture = True
-            Material.msfs_show_emissive_texture = True
-            Material.msfs_show_detail_color_texture = True
-            Material.msfs_show_detail_comp_texture = True
-            Material.msfs_show_detail_normal_texture = True
-            Material.msfs_show_blend_mask_texture = True
-            Material.msfs_show_wetness_ao_texture = True
-            Material.msfs_show_dirt_texture = False
-            Material.msfs_show_height_map_texture = False
+    elif self.msfs_material_type == "msfs_porthole": # Porthole
+        # Properties
+        self.msfs_show_colors = True
+        self.msfs_show_emissive_color = True
 
-        elif mat.msfs_material_type == "msfs_porthole": # Porthole
-            # Properties
-            mat.msfs_show_colors = True
-            mat.msfs_show_emissive_color = True
+        self.msfs_show_alpha_mode = False
 
-            mat.msfs_show_alpha_mode = False
+        self.msfs_show_render_options = True
+        self.msfs_show_day_night_cycle = False
 
-            mat.msfs_show_render_options = True
-            mat.msfs_show_day_night_cycle = False
+        self.msfs_show_pearl = True
 
-            mat.msfs_show_pearl = True
+        self.msfs_show_gameplay_options = True
 
-            mat.msfs_show_gameplay_options = True
+        self.msfs_show_uv_options = True
 
-            mat.msfs_show_uv_options = True
+        self.msfs_show_material_options = True
+        self.msfs_show_material_detail_options = True
+        self.msfs_show_blend_threshold = True
 
-            mat.msfs_show_material_options = True
-            mat.msfs_show_material_detail_options = True
-            mat.msfs_show_blend_threshold = True
+        self.msfs_show_decal_blend_factors = False
 
-            mat.msfs_show_decal_blend_factors = False
+        self.msfs_show_windshield_options = False
 
-            mat.msfs_show_windshield_options = False
+        self.msfs_show_glass_options = False
 
-            mat.msfs_show_glass_options = False
+        self.msfs_show_parallax_options = False
 
-            mat.msfs_show_parallax_options = False
+        self.msfs_show_sss_color = False
 
-            mat.msfs_show_sss_color = False
+        self.msfs_show_fresnel_options = False
 
-            mat.msfs_show_fresnel_options = False
+        # Textures
+        Material.msfs_show_base_color_texture = True
+        Material.msfs_show_comp_texture = True
+        Material.msfs_show_normal_texture = True
+        Material.msfs_show_emissive_texture = True
+        Material.msfs_show_detail_color_texture = True
+        Material.msfs_show_detail_comp_texture = True
+        Material.msfs_show_detail_normal_texture = True
+        Material.msfs_show_blend_mask_texture = True
+        Material.msfs_show_wetness_ao_texture = False
+        Material.msfs_show_dirt_texture = False
+        Material.msfs_show_height_map_texture = False
 
-            # Textures
-            Material.msfs_show_base_color_texture = True
-            Material.msfs_show_comp_texture = True
-            Material.msfs_show_normal_texture = True
-            Material.msfs_show_emissive_texture = True
-            Material.msfs_show_detail_color_texture = True
-            Material.msfs_show_detail_comp_texture = True
-            Material.msfs_show_detail_normal_texture = True
-            Material.msfs_show_blend_mask_texture = True
-            Material.msfs_show_wetness_ao_texture = False
-            Material.msfs_show_dirt_texture = False
-            Material.msfs_show_height_map_texture = False
+    elif self.msfs_material_type == "msfs_glass": # Glass
+        # Properties
+        self.msfs_show_colors = True
+        self.msfs_show_emissive_color = True
 
-        elif mat.msfs_material_type == "msfs_glass": # Glass
-            # Properties
-            mat.msfs_show_colors = True
-            mat.msfs_show_emissive_color = True
+        self.msfs_show_alpha_mode = False
 
-            mat.msfs_show_alpha_mode = False
+        self.msfs_show_render_options = True
+        self.msfs_show_day_night_cycle = False
+        
+        self.msfs_show_pearl = True
 
-            mat.msfs_show_render_options = True
-            mat.msfs_show_day_night_cycle = False
-            
-            mat.msfs_show_pearl = True
+        self.msfs_show_gameplay_options = True
 
-            mat.msfs_show_gameplay_options = True
+        self.msfs_show_uv_options = True
 
-            mat.msfs_show_uv_options = True
+        self.msfs_show_material_options = True
+        self.msfs_show_material_detail_options = True
+        self.msfs_show_blend_threshold = True
 
-            mat.msfs_show_material_options = True
-            mat.msfs_show_material_detail_options = True
-            mat.msfs_show_blend_threshold = True
+        self.msfs_show_decal_blend_factors = False
 
-            mat.msfs_show_decal_blend_factors = False
+        self.msfs_show_windshield_options = False
 
-            mat.msfs_show_windshield_options = False
+        self.msfs_show_glass_options = True
 
-            mat.msfs_show_glass_options = True
+        self.msfs_show_parallax_options = False
 
-            mat.msfs_show_parallax_options = False
+        self.msfs_show_sss_color = False
 
-            mat.msfs_show_sss_color = False
+        self.msfs_show_fresnel_options = False
 
-            mat.msfs_show_fresnel_options = False
+        # Textures
+        Material.msfs_show_base_color_texture = True
+        Material.msfs_show_comp_texture = True
+        Material.msfs_show_normal_texture = True
+        Material.msfs_show_emissive_texture = True
+        Material.msfs_show_detail_color_texture = True
+        Material.msfs_show_detail_comp_texture = True
+        Material.msfs_show_detail_normal_texture = True
+        Material.msfs_show_blend_mask_texture = True
+        Material.msfs_show_wetness_ao_texture = False
+        Material.msfs_show_dirt_texture = False
+        Material.msfs_show_height_map_texture = False
 
-            # Textures
-            Material.msfs_show_base_color_texture = True
-            Material.msfs_show_comp_texture = True
-            Material.msfs_show_normal_texture = True
-            Material.msfs_show_emissive_texture = True
-            Material.msfs_show_detail_color_texture = True
-            Material.msfs_show_detail_comp_texture = True
-            Material.msfs_show_detail_normal_texture = True
-            Material.msfs_show_blend_mask_texture = True
-            Material.msfs_show_wetness_ao_texture = False
-            Material.msfs_show_dirt_texture = False
-            Material.msfs_show_height_map_texture = False
+    elif self.msfs_material_type == "msfs_geo_decal": # Geo Decal (Frosted)
+        # Properties
+        self.msfs_show_colors = True
+        self.msfs_show_emissive_color = True
 
-        elif mat.msfs_material_type == "msfs_geo_decal": # Geo Decal (Frosted)
-            # Properties
-            mat.msfs_show_colors = True
-            mat.msfs_show_emissive_color = True
+        self.msfs_show_alpha_mode = False
 
-            mat.msfs_show_alpha_mode = False
+        self.msfs_show_render_options = True
+        self.msfs_show_day_night_cycle = False
+        
+        self.msfs_show_pearl = True
 
-            mat.msfs_show_render_options = True
-            mat.msfs_show_day_night_cycle = False
-            
-            mat.msfs_show_pearl = True
+        self.msfs_show_gameplay_options = True
 
-            mat.msfs_show_gameplay_options = True
+        self.msfs_show_uv_options = True
 
-            mat.msfs_show_uv_options = True
+        self.msfs_show_material_options = True
+        self.msfs_show_material_detail_options = True
+        self.msfs_show_blend_threshold = True
 
-            mat.msfs_show_material_options = True
-            mat.msfs_show_material_detail_options = True
-            mat.msfs_show_blend_threshold = True
+        self.msfs_show_decal_blend_factors = True
 
-            mat.msfs_show_decal_blend_factors = True
+        self.msfs_show_windshield_options = False
 
-            mat.msfs_show_windshield_options = False
+        self.msfs_show_glass_options = False
 
-            mat.msfs_show_glass_options = False
+        self.msfs_show_parallax_options = False
 
-            mat.msfs_show_parallax_options = False
+        self.msfs_show_sss_color = False
 
-            mat.msfs_show_sss_color = False
+        self.msfs_show_fresnel_options = False
 
-            mat.msfs_show_fresnel_options = False
+        # Textures
+        Material.msfs_show_base_color_texture = True
+        Material.msfs_show_comp_texture = True
+        Material.msfs_show_normal_texture = True
+        Material.msfs_show_emissive_texture = True
+        Material.msfs_show_detail_color_texture = True
+        Material.msfs_show_detail_comp_texture = True
+        Material.msfs_show_detail_normal_texture = True
+        Material.msfs_show_blend_mask_texture = False
+        Material.msfs_show_wetness_ao_texture = False
+        Material.msfs_show_dirt_texture = False
+        Material.msfs_show_height_map_texture = False
 
-            # Textures
-            Material.msfs_show_base_color_texture = True
-            Material.msfs_show_comp_texture = True
-            Material.msfs_show_normal_texture = True
-            Material.msfs_show_emissive_texture = True
-            Material.msfs_show_detail_color_texture = True
-            Material.msfs_show_detail_comp_texture = True
-            Material.msfs_show_detail_normal_texture = True
-            Material.msfs_show_blend_mask_texture = False
-            Material.msfs_show_wetness_ao_texture = False
-            Material.msfs_show_dirt_texture = False
-            Material.msfs_show_height_map_texture = False
+    elif self.msfs_material_type == "msfs_clearcoat": # Clearcoat
+        # Properties
+        self.msfs_show_colors = True
+        self.msfs_show_emissive_color = True
 
-        elif mat.msfs_material_type == "msfs_clearcoat": # Clearcoat
-            # Properties
-            mat.msfs_show_colors = True
-            mat.msfs_show_emissive_color = True
+        self.msfs_show_alpha_mode = True
 
-            mat.msfs_show_alpha_mode = True
+        self.msfs_show_render_options = True
+        self.msfs_show_day_night_cycle = False
 
-            mat.msfs_show_render_options = True
-            mat.msfs_show_day_night_cycle = False
+        self.msfs_show_pearl = True
 
-            mat.msfs_show_pearl = True
+        self.msfs_show_gameplay_options = True
 
-            mat.msfs_show_gameplay_options = True
+        self.msfs_show_uv_options = True
 
-            mat.msfs_show_uv_options = True
+        self.msfs_show_material_options = True
+        self.msfs_show_material_detail_options = True
+        self.msfs_show_blend_threshold = True
 
-            mat.msfs_show_material_options = True
-            mat.msfs_show_material_detail_options = True
-            mat.msfs_show_blend_threshold = True
+        self.msfs_show_decal_blend_factors = False
 
-            mat.msfs_show_decal_blend_factors = False
+        self.msfs_show_windshield_options = False
 
-            mat.msfs_show_windshield_options = False
+        self.msfs_show_glass_options = False
 
-            mat.msfs_show_glass_options = False
+        self.msfs_show_parallax_options = False
 
-            mat.msfs_show_parallax_options = False
+        self.msfs_show_sss_color = False
 
-            mat.msfs_show_sss_color = False
+        self.msfs_show_fresnel_options = False
 
-            mat.msfs_show_fresnel_options = False
+        # Textures
+        Material.msfs_show_base_color_texture = True
+        Material.msfs_show_comp_texture = True
+        Material.msfs_show_normal_texture = True
+        Material.msfs_show_emissive_texture = True
+        Material.msfs_show_detail_color_texture = True
+        Material.msfs_show_detail_comp_texture = True
+        Material.msfs_show_detail_normal_texture = True
+        Material.msfs_show_blend_mask_texture = True
+        Material.msfs_show_wetness_ao_texture = False
+        Material.msfs_show_dirt_texture = True
+        Material.msfs_show_height_map_texture = False
 
-            # Textures
-            Material.msfs_show_base_color_texture = True
-            Material.msfs_show_comp_texture = True
-            Material.msfs_show_normal_texture = True
-            Material.msfs_show_emissive_texture = True
-            Material.msfs_show_detail_color_texture = True
-            Material.msfs_show_detail_comp_texture = True
-            Material.msfs_show_detail_normal_texture = True
-            Material.msfs_show_blend_mask_texture = True
-            Material.msfs_show_wetness_ao_texture = False
-            Material.msfs_show_dirt_texture = True
-            Material.msfs_show_height_map_texture = False
+    elif self.msfs_material_type == "msfs_parallax": # Parallax
+        # Properties
+        self.msfs_show_colors = True
+        self.msfs_show_emissive_color = True
 
-        elif mat.msfs_material_type == "msfs_parallax": # Parallax
-            # Properties
-            mat.msfs_show_colors = True
-            mat.msfs_show_emissive_color = True
+        self.msfs_show_alpha_mode = True
 
-            mat.msfs_show_alpha_mode = True
+        self.msfs_show_render_options = True
+        self.msfs_show_day_night_cycle = False
 
-            mat.msfs_show_render_options = True
-            mat.msfs_show_day_night_cycle = False
+        self.msfs_show_pearl = True
 
-            mat.msfs_show_pearl = True
+        self.msfs_show_gameplay_options = True
 
-            mat.msfs_show_gameplay_options = True
+        self.msfs_show_uv_options = True
 
-            mat.msfs_show_uv_options = True
+        self.msfs_show_material_options = True
+        self.msfs_show_material_detail_options = False
+        self.msfs_show_blend_threshold = True
 
-            mat.msfs_show_material_options = True
-            mat.msfs_show_material_detail_options = False
-            mat.msfs_show_blend_threshold = True
+        self.msfs_show_decal_blend_factors = False
 
-            mat.msfs_show_decal_blend_factors = False
+        self.msfs_show_windshield_options = False
 
-            mat.msfs_show_windshield_options = False
+        self.msfs_show_glass_options = False
 
-            mat.msfs_show_glass_options = False
+        self.msfs_show_parallax_options = True
 
-            mat.msfs_show_parallax_options = True
+        self.msfs_show_sss_color = False
 
-            mat.msfs_show_sss_color = False
+        self.msfs_show_fresnel_options = False
 
-            mat.msfs_show_fresnel_options = False
+        # Textures
+        Material.msfs_show_base_color_texture = True
+        Material.msfs_show_comp_texture = True
+        Material.msfs_show_normal_texture = True
+        Material.msfs_show_emissive_texture = True
+        Material.msfs_show_detail_color_texture = True
+        Material.msfs_show_detail_comp_texture = False
+        Material.msfs_show_detail_normal_texture = False
+        Material.msfs_show_blend_mask_texture = False
+        Material.msfs_show_wetness_ao_texture = False
+        Material.msfs_show_dirt_texture = False
+        Material.msfs_show_height_map_texture = False
 
-            # Textures
-            Material.msfs_show_base_color_texture = True
-            Material.msfs_show_comp_texture = True
-            Material.msfs_show_normal_texture = True
-            Material.msfs_show_emissive_texture = True
-            Material.msfs_show_detail_color_texture = True
-            Material.msfs_show_detail_comp_texture = False
-            Material.msfs_show_detail_normal_texture = False
-            Material.msfs_show_blend_mask_texture = False
-            Material.msfs_show_wetness_ao_texture = False
-            Material.msfs_show_dirt_texture = False
-            Material.msfs_show_height_map_texture = False
+    elif self.msfs_material_type == "msfs_anisotropic": # Anisotropic
+        # Properties
+        self.msfs_show_colors = True
+        self.msfs_show_emissive_color = True
 
-        elif mat.msfs_material_type == "msfs_anisotropic": # Anisotropic
-            # Properties
-            mat.msfs_show_colors = True
-            mat.msfs_show_emissive_color = True
+        self.msfs_show_alpha_mode = True
 
-            mat.msfs_show_alpha_mode = True
+        self.msfs_show_render_options = True
+        self.msfs_show_day_night_cycle = False
 
-            mat.msfs_show_render_options = True
-            mat.msfs_show_day_night_cycle = False
+        self.msfs_show_pearl = True
 
-            mat.msfs_show_pearl = True
+        self.msfs_show_gameplay_options = True
 
-            mat.msfs_show_gameplay_options = True
+        self.msfs_show_uv_options = True
 
-            mat.msfs_show_uv_options = True
+        self.msfs_show_material_options = True
+        self.msfs_show_material_detail_options = True
+        self.msfs_show_blend_threshold = True
 
-            mat.msfs_show_material_options = True
-            mat.msfs_show_material_detail_options = True
-            mat.msfs_show_blend_threshold = True
+        self.msfs_show_decal_blend_factors = False
 
-            mat.msfs_show_decal_blend_factors = False
+        self.msfs_show_windshield_options = False
 
-            mat.msfs_show_windshield_options = False
+        self.msfs_show_glass_options = False
 
-            mat.msfs_show_glass_options = False
+        self.msfs_show_parallax_options = False
 
-            mat.msfs_show_parallax_options = False
+        self.msfs_show_sss_color = False
 
-            mat.msfs_show_sss_color = False
+        self.msfs_show_fresnel_options = False
 
-            mat.msfs_show_fresnel_options = False
+        # Textures
+        Material.msfs_show_base_color_texture = True
+        Material.msfs_show_comp_texture = True
+        Material.msfs_show_normal_texture = True
+        Material.msfs_show_emissive_texture = True
+        Material.msfs_show_detail_color_texture = True
+        Material.msfs_show_detail_comp_texture = True
+        Material.msfs_show_detail_normal_texture = True
+        Material.msfs_show_blend_mask_texture = True
+        Material.msfs_show_wetness_ao_texture = True
+        Material.msfs_show_dirt_texture = False
+        Material.msfs_show_height_map_texture = False
 
-            # Textures
-            Material.msfs_show_base_color_texture = True
-            Material.msfs_show_comp_texture = True
-            Material.msfs_show_normal_texture = True
-            Material.msfs_show_emissive_texture = True
-            Material.msfs_show_detail_color_texture = True
-            Material.msfs_show_detail_comp_texture = True
-            Material.msfs_show_detail_normal_texture = True
-            Material.msfs_show_blend_mask_texture = True
-            Material.msfs_show_wetness_ao_texture = True
-            Material.msfs_show_dirt_texture = False
-            Material.msfs_show_height_map_texture = False
+    elif self.msfs_material_type == "msfs_hair": # Hair
+        # Properties
+        self.msfs_show_colors = True
+        self.msfs_show_emissive_color = True
 
-        elif mat.msfs_material_type == "msfs_hair": # Hair
-            # Properties
-            mat.msfs_show_colors = True
-            mat.msfs_show_emissive_color = True
+        self.msfs_show_alpha_mode = True
 
-            mat.msfs_show_alpha_mode = True
+        self.msfs_show_render_options = True
+        self.msfs_show_day_night_cycle = False
 
-            mat.msfs_show_render_options = True
-            mat.msfs_show_day_night_cycle = False
+        self.msfs_show_pearl = True
 
-            mat.msfs_show_pearl = True
+        self.msfs_show_gameplay_options = True
 
-            mat.msfs_show_gameplay_options = True
+        self.msfs_show_uv_options = True
 
-            mat.msfs_show_uv_options = True
+        self.msfs_show_material_options = True
+        self.msfs_show_material_detail_options = True
+        self.msfs_show_blend_threshold = True
 
-            mat.msfs_show_material_options = True
-            mat.msfs_show_material_detail_options = True
-            mat.msfs_show_blend_threshold = True
+        self.msfs_show_decal_blend_factors = False
 
-            mat.msfs_show_decal_blend_factors = False
+        self.msfs_show_windshield_options = False
 
-            mat.msfs_show_windshield_options = False
+        self.msfs_show_glass_options = False
 
-            mat.msfs_show_glass_options = False
+        self.msfs_show_parallax_options = False
 
-            mat.msfs_show_parallax_options = False
+        self.msfs_show_sss_color = False # Doesn't seem to be enabled in the 3DS Max plugin
 
-            mat.msfs_show_sss_color = False # Doesn't seem to be enabled in the 3DS Max plugin
+        self.msfs_show_fresnel_options = False
 
-            mat.msfs_show_fresnel_options = False
+        # Textures
+        Material.msfs_show_base_color_texture = True
+        Material.msfs_show_comp_texture = True
+        Material.msfs_show_normal_texture = True
+        Material.msfs_show_emissive_texture = True
+        Material.msfs_show_detail_color_texture = False
+        Material.msfs_show_detail_comp_texture = False
+        Material.msfs_show_detail_normal_texture = False
+        Material.msfs_show_blend_mask_texture = False
+        Material.msfs_show_wetness_ao_texture = True
+        Material.msfs_show_dirt_texture = False
+        Material.msfs_show_height_map_texture = False
 
-            # Textures
-            Material.msfs_show_base_color_texture = True
-            Material.msfs_show_comp_texture = True
-            Material.msfs_show_normal_texture = True
-            Material.msfs_show_emissive_texture = True
-            Material.msfs_show_detail_color_texture = False
-            Material.msfs_show_detail_comp_texture = False
-            Material.msfs_show_detail_normal_texture = False
-            Material.msfs_show_blend_mask_texture = False
-            Material.msfs_show_wetness_ao_texture = True
-            Material.msfs_show_dirt_texture = False
-            Material.msfs_show_height_map_texture = False
+    elif self.msfs_material_type == "msfs_sss": # SSS
+        # Properties
+        self.msfs_show_colors = True
+        self.msfs_show_emissive_color = True
 
-        elif mat.msfs_material_type == "msfs_sss": # SSS
-            # Properties
-            mat.msfs_show_colors = True
-            mat.msfs_show_emissive_color = True
+        self.msfs_show_alpha_mode = True
 
-            mat.msfs_show_alpha_mode = True
+        self.msfs_show_render_options = True
+        self.msfs_show_day_night_cycle = False
 
-            mat.msfs_show_render_options = True
-            mat.msfs_show_day_night_cycle = False
+        self.msfs_show_pearl = True
 
-            mat.msfs_show_pearl = True
+        self.msfs_show_gameplay_options = True
 
-            mat.msfs_show_gameplay_options = True
+        self.msfs_show_uv_options = True
 
-            mat.msfs_show_uv_options = True
+        self.msfs_show_material_options = True
+        self.msfs_show_material_detail_options = False
+        self.msfs_show_blend_threshold = False
 
-            mat.msfs_show_material_options = True
-            mat.msfs_show_material_detail_options = False
-            mat.msfs_show_blend_threshold = False
+        self.msfs_show_decal_blend_factors = False
 
-            mat.msfs_show_decal_blend_factors = False
+        self.msfs_show_windshield_options = False
 
-            mat.msfs_show_windshield_options = False
+        self.msfs_show_glass_options = False
 
-            mat.msfs_show_glass_options = False
+        self.msfs_show_parallax_options = False
 
-            mat.msfs_show_parallax_options = False
+        self.msfs_show_sss_color = False # Doesn't seem to be enabled in the 3DS Max plugin
+        
+        self.msfs_show_fresnel_options = False
 
-            mat.msfs_show_sss_color = False # Doesn't seem to be enabled in the 3DS Max plugin
-            
-            mat.msfs_show_fresnel_options = False
+        # Textures
+        Material.msfs_show_base_color_texture = True
+        Material.msfs_show_comp_texture = True
+        Material.msfs_show_normal_texture = True
+        Material.msfs_show_emissive_texture = True
+        Material.msfs_show_detail_color_texture = False
+        Material.msfs_show_detail_comp_texture = False
+        Material.msfs_show_detail_normal_texture = False
+        Material.msfs_show_blend_mask_texture = False
+        Material.msfs_show_wetness_ao_texture = False
+        Material.msfs_show_dirt_texture = False
+        Material.msfs_show_height_map_texture = False
 
-            # Textures
-            Material.msfs_show_base_color_texture = True
-            Material.msfs_show_comp_texture = True
-            Material.msfs_show_normal_texture = True
-            Material.msfs_show_emissive_texture = True
-            Material.msfs_show_detail_color_texture = False
-            Material.msfs_show_detail_comp_texture = False
-            Material.msfs_show_detail_normal_texture = False
-            Material.msfs_show_blend_mask_texture = False
-            Material.msfs_show_wetness_ao_texture = False
-            Material.msfs_show_dirt_texture = False
-            Material.msfs_show_height_map_texture = False
+    elif self.msfs_material_type == "msfs_invisible": # Invisible
+        # Properties
+        self.msfs_show_colors = True
+        self.msfs_show_emissive_color = False
 
-        elif mat.msfs_material_type == "msfs_invisible": # Invisible
-            # Properties
-            mat.msfs_show_colors = True
-            mat.msfs_show_emissive_color = False
+        self.msfs_show_alpha_mode = False
 
-            mat.msfs_show_alpha_mode = False
+        self.msfs_show_render_options = False
+        self.msfs_show_day_night_cycle = False
 
-            mat.msfs_show_render_options = False
-            mat.msfs_show_day_night_cycle = False
+        self.msfs_show_pearl = True
 
-            mat.msfs_show_pearl = True
+        self.msfs_show_gameplay_options = True
 
-            mat.msfs_show_gameplay_options = True
+        self.msfs_show_uv_options = True
 
-            mat.msfs_show_uv_options = True
+        self.msfs_show_material_options = False
+        self.msfs_show_material_detail_options = False
+        self.msfs_show_blend_threshold = False
 
-            mat.msfs_show_material_options = False
-            mat.msfs_show_material_detail_options = False
-            mat.msfs_show_blend_threshold = False
+        self.msfs_show_decal_blend_factors = False
 
-            mat.msfs_show_decal_blend_factors = False
+        self.msfs_show_windshield_options = False
 
-            mat.msfs_show_windshield_options = False
+        self.msfs_show_glass_options = False
 
-            mat.msfs_show_glass_options = False
+        self.msfs_show_parallax_options = False
 
-            mat.msfs_show_parallax_options = False
+        self.msfs_show_sss_color = False
 
-            mat.msfs_show_sss_color = False
+        self.msfs_show_fresnel_options = False
 
-            mat.msfs_show_fresnel_options = False
+        # Textures
+        Material.msfs_show_base_color_texture = False
+        Material.msfs_show_comp_texture = False
+        Material.msfs_show_normal_texture = False
+        Material.msfs_show_emissive_texture = False
+        Material.msfs_show_detail_color_texture = False
+        Material.msfs_show_detail_comp_texture = False
+        Material.msfs_show_detail_normal_texture = False
+        Material.msfs_show_blend_mask_texture = False
+        Material.msfs_show_wetness_ao_texture = False
+        Material.msfs_show_dirt_texture = False
+        Material.msfs_show_height_map_texture = False
 
-            # Textures
-            Material.msfs_show_base_color_texture = False
-            Material.msfs_show_comp_texture = False
-            Material.msfs_show_normal_texture = False
-            Material.msfs_show_emissive_texture = False
-            Material.msfs_show_detail_color_texture = False
-            Material.msfs_show_detail_comp_texture = False
-            Material.msfs_show_detail_normal_texture = False
-            Material.msfs_show_blend_mask_texture = False
-            Material.msfs_show_wetness_ao_texture = False
-            Material.msfs_show_dirt_texture = False
-            Material.msfs_show_height_map_texture = False
+    elif self.msfs_material_type == "msfs_fake_terrain": # Fake Terrain
+        # Properties
+        self.msfs_show_colors = True
+        self.msfs_show_emissive_color = True
 
-        elif mat.msfs_material_type == "msfs_fake_terrain": # Fake Terrain
-            # Properties
-            mat.msfs_show_colors = True
-            mat.msfs_show_emissive_color = True
+        self.msfs_show_alpha_mode = False
 
-            mat.msfs_show_alpha_mode = False
+        self.msfs_show_render_options = True
+        self.msfs_show_day_night_cycle = False
 
-            mat.msfs_show_render_options = True
-            mat.msfs_show_day_night_cycle = False
+        self.msfs_show_pearl = True
 
-            mat.msfs_show_pearl = True
+        self.msfs_show_gameplay_options = True
 
-            mat.msfs_show_gameplay_options = True
+        self.msfs_show_uv_options = True
+        
+        self.msfs_show_material_options = True
+        self.msfs_show_material_detail_options = True
+        self.msfs_show_blend_threshold = True
 
-            mat.msfs_show_uv_options = True
-            
-            mat.msfs_show_material_options = True
-            mat.msfs_show_material_detail_options = True
-            mat.msfs_show_blend_threshold = True
+        self.msfs_show_decal_blend_factors = False
 
-            mat.msfs_show_decal_blend_factors = False
+        self.msfs_show_windshield_options = False
 
-            mat.msfs_show_windshield_options = False
+        self.msfs_show_glass_options = False
 
-            mat.msfs_show_glass_options = False
+        self.msfs_show_parallax_options = False
 
-            mat.msfs_show_parallax_options = False
+        self.msfs_show_sss_color = False
 
-            mat.msfs_show_sss_color = False
+        self.msfs_show_fresnel_options = False
 
-            mat.msfs_show_fresnel_options = False
+        # Textures
+        Material.msfs_show_base_color_texture = True
+        Material.msfs_show_comp_texture = True
+        Material.msfs_show_normal_texture = True
+        Material.msfs_show_emissive_texture = True
+        Material.msfs_show_detail_color_texture = True
+        Material.msfs_show_detail_comp_texture = True
+        Material.msfs_show_detail_normal_texture = True
+        Material.msfs_show_blend_mask_texture = True
+        Material.msfs_show_wetness_ao_texture = False
+        Material.msfs_show_dirt_texture = False
+        Material.msfs_show_height_map_texture = False
 
-            # Textures
-            Material.msfs_show_base_color_texture = True
-            Material.msfs_show_comp_texture = True
-            Material.msfs_show_normal_texture = True
-            Material.msfs_show_emissive_texture = True
-            Material.msfs_show_detail_color_texture = True
-            Material.msfs_show_detail_comp_texture = True
-            Material.msfs_show_detail_normal_texture = True
-            Material.msfs_show_blend_mask_texture = True
-            Material.msfs_show_wetness_ao_texture = False
-            Material.msfs_show_dirt_texture = False
-            Material.msfs_show_height_map_texture = False
+    elif self.msfs_material_type == "msfs_fresnel": # Fresnel
+        # Properties
+        self.msfs_show_colors = True
+        self.msfs_show_emissive_color = True
 
-        elif mat.msfs_material_type == "msfs_fresnel": # Fresnel
-            # Properties
-            mat.msfs_show_colors = True
-            mat.msfs_show_emissive_color = True
+        self.msfs_show_alpha_mode = True
 
-            mat.msfs_show_alpha_mode = True
+        self.msfs_show_render_options = True
+        self.msfs_show_day_night_cycle = False
 
-            mat.msfs_show_render_options = True
-            mat.msfs_show_day_night_cycle = False
+        self.msfs_show_pearl = True
 
-            mat.msfs_show_pearl = True
+        self.msfs_show_gameplay_options = True
+        
+        self.msfs_show_uv_options = True
 
-            mat.msfs_show_gameplay_options = True
-            
-            mat.msfs_show_uv_options = True
+        self.msfs_show_material_options = True
+        self.msfs_show_material_detail_options = False
+        self.msfs_show_blend_threshold = False
 
-            mat.msfs_show_material_options = True
-            mat.msfs_show_material_detail_options = False
-            mat.msfs_show_blend_threshold = False
+        self.msfs_show_decal_blend_factors = False
 
-            mat.msfs_show_decal_blend_factors = False
+        self.msfs_show_windshield_options = False
 
-            mat.msfs_show_windshield_options = False
+        self.msfs_show_glass_options = False
 
-            mat.msfs_show_glass_options = False
+        self.msfs_show_parallax_options = False
 
-            mat.msfs_show_parallax_options = False
+        self.msfs_show_sss_color = False
 
-            mat.msfs_show_sss_color = False
+        self.msfs_show_fresnel_options = True
 
-            mat.msfs_show_fresnel_options = True
+        # Textures
+        Material.msfs_show_base_color_texture = True
+        Material.msfs_show_comp_texture = True
+        Material.msfs_show_normal_texture = True
+        Material.msfs_show_emissive_texture = True
+        Material.msfs_show_detail_color_texture = False
+        Material.msfs_show_detail_comp_texture = False
+        Material.msfs_show_detail_normal_texture = False
+        Material.msfs_show_blend_mask_texture = False
+        Material.msfs_show_wetness_ao_texture = False
+        Material.msfs_show_dirt_texture = False
+        Material.msfs_show_height_map_texture = False
 
-            # Textures
-            Material.msfs_show_base_color_texture = True
-            Material.msfs_show_comp_texture = True
-            Material.msfs_show_normal_texture = True
-            Material.msfs_show_emissive_texture = True
-            Material.msfs_show_detail_color_texture = False
-            Material.msfs_show_detail_comp_texture = False
-            Material.msfs_show_detail_normal_texture = False
-            Material.msfs_show_blend_mask_texture = False
-            Material.msfs_show_wetness_ao_texture = False
-            Material.msfs_show_dirt_texture = False
-            Material.msfs_show_height_map_texture = False
+    elif self.msfs_material_type == "msfs_env_occluder": # Environment Occluder
+        # Properties
+        self.msfs_show_colors = True
+        self.msfs_show_emissive_color = False
 
-        elif mat.msfs_material_type == "msfs_env_occluder": # Environment Occluder
-            # Properties
-            mat.msfs_show_colors = True
-            mat.msfs_show_emissive_color = False
+        self.msfs_show_alpha_mode = False
 
-            mat.msfs_show_alpha_mode = False
+        self.msfs_show_render_options = False
+        self.msfs_show_day_night_cycle = False
 
-            mat.msfs_show_render_options = False
-            mat.msfs_show_day_night_cycle = False
+        self.msfs_show_pearl = True
 
-            mat.msfs_show_pearl = True
+        self.msfs_show_gameplay_options = False
 
-            mat.msfs_show_gameplay_options = False
+        self.msfs_show_uv_options = False
 
-            mat.msfs_show_uv_options = False
+        self.msfs_show_material_options = False
+        self.msfs_show_material_detail_options = False
+        self.msfs_show_blend_threshold = False
 
-            mat.msfs_show_material_options = False
-            mat.msfs_show_material_detail_options = False
-            mat.msfs_show_blend_threshold = False
+        self.msfs_show_decal_blend_factors = False
 
-            mat.msfs_show_decal_blend_factors = False
+        self.msfs_show_windshield_options = False
 
-            mat.msfs_show_windshield_options = False
+        self.msfs_show_glass_options = False
 
-            mat.msfs_show_glass_options = False
+        self.msfs_show_parallax_options = False
 
-            mat.msfs_show_parallax_options = False
+        self.msfs_show_sss_color = False
+        
+        self.msfs_show_fresnel_options = False
 
-            mat.msfs_show_sss_color = False
-            
-            mat.msfs_show_fresnel_options = False
-
-            # Textures
-            Material.msfs_show_base_color_texture = False
-            Material.msfs_show_comp_texture = False
-            Material.msfs_show_normal_texture = False
-            Material.msfs_show_emissive_texture = False
-            Material.msfs_show_detail_color_texture = False
-            Material.msfs_show_detail_comp_texture = False
-            Material.msfs_show_detail_normal_texture = False
-            Material.msfs_show_blend_mask_texture = False
-            Material.msfs_show_wetness_ao_texture = False
-            Material.msfs_show_dirt_texture = False
-            Material.msfs_show_height_map_texture = False
+        # Textures
+        Material.msfs_show_base_color_texture = False
+        Material.msfs_show_comp_texture = False
+        Material.msfs_show_normal_texture = False
+        Material.msfs_show_emissive_texture = False
+        Material.msfs_show_detail_color_texture = False
+        Material.msfs_show_detail_comp_texture = False
+        Material.msfs_show_detail_normal_texture = False
+        Material.msfs_show_blend_mask_texture = False
+        Material.msfs_show_wetness_ao_texture = False
+        Material.msfs_show_dirt_texture = False
+        Material.msfs_show_height_map_texture = False
 
 class MSFSMaterialProperties(PropertyGroup):
 

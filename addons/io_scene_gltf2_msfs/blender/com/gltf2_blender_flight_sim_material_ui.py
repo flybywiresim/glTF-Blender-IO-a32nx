@@ -183,7 +183,7 @@ class MATERIAL_PT_MSFSMaterials(Panel):
                             box.label(text = "Melt Pattern (R), Roughness (G), Metallic (B)")
                         else:
                             if mat.msfs_blend_mask_texture is None:
-                                box.label(text = "Detail Occlusion (R), Roughness (G), Metallic (B)")
+                                box.label(text = "Detail Composite (Occlusion (R), Roughness (G), Metallic (B))")
                             else:
                                 box.label(text = "Secondary Occlusion (R), Roughness (G), Metallic (B)")
                         box.template_ID(mat, "msfs_detail_comp_texture", new = "image.new", open = "image.open")

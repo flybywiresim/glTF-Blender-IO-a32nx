@@ -34,8 +34,11 @@ class BlenderMaterial():
         if name is None:
             name = "Material_" + str(material_idx)
 
+        msfs_material_type = BlenderMaterial.determine_msfs_material_type(pymaterial)
+
         mat = bpy.data.materials.new(name)
         pymaterial.blender_material[vertex_color] = mat.name
+        mat.msfs_material_type = msfs_material_type
 
         set_extras(mat, pymaterial.extras)
         BlenderMaterial.set_double_sided(pymaterial, mat)
@@ -89,3 +92,43 @@ class BlenderMaterial():
             color = pbr.base_color_factor or [1, 1, 1, 1]
 
         mat.diffuse_color = color
+
+    @staticmethod
+    def determine_msfs_material_type(pymaterial):
+        extras = pymaterial.extras
+        extensions = pymaterial.extensions
+        material_type = "msfs_standard"
+        if extras is not None:
+            if "ASOBO_material_code" in extras:
+                material_code = pymaterial.extras["ASOBO_material_code"]
+                if material_code == "Windshield":
+                    material_type = "msfs_windshield"
+                elif material_code == "Porthole":
+                    material_type = "msfs_porthole"
+                elif material_code == "GeoDecalFrosted":
+                    material_type = "msfs_geo_decal"
+                else:
+                    raise Exception("Unknown ASOBO_material_code")
+        if extensions is not None:
+            if "ASOBO_material_anisotropic" in extensions:
+                material_type = "msfs_anisotropic"
+            elif "ASOBO_material_SSS" in extensions:
+                material_type = "msfs_sss"
+            elif "ASOBO_material_glass" in extensions or "ASOBO_material_kitty_glass" in extensions: # glass has two material types
+                material_type = "msfs_glass"
+            elif "ASOBO_material_blend_gbuffer" in extensions:
+                material_type = "msfs_decal"
+            elif "ASOBO_material_clear_coat" in extensions:
+                material_type = "msfs_clearcoat"
+            elif "ASOBO_material_environment_occluder" in extensions:
+                material_type = "msfs_env_occluder"
+            elif "ASOBO_material_fake_terrain" in extensions:
+                material_type = "msfs_fake_terrain"
+            elif "ASOBO_material_fresnel_fade" in extensions:
+                material_type = "msfs_fresnel"
+            elif "ASOBO_material_parallax_window" in extensions:
+                material_type = "msfs_parallax"
+            elif "ASOBO_material_invisible" in extensions:
+                material_type = "msfs_invisible"
+        
+        return material_type
