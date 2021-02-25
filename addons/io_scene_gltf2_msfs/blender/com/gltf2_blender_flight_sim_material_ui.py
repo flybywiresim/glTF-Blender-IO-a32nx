@@ -38,10 +38,10 @@ class MATERIAL_PT_MSFSMaterials(Panel):
                     box = layout.box()
                     box.label(text = "Colors", icon = "COLOR")
                     row = box.row()
-                    row.prop(mat, "msfs_base_color")
+                    row.prop(mat, "msfs_base_color_factor")
                     if mat.msfs_show_emissive_color:
                         row = box.row()
-                        row.prop(mat, "msfs_emissive_color")
+                        row.prop(mat, "msfs_emissive_factor")
                     if mat.msfs_show_sss_color:
                         row = box.row()
                         row.prop(mat, "msfs_sss_color")
@@ -82,8 +82,8 @@ class MATERIAL_PT_MSFSMaterials(Panel):
                 if mat.msfs_show_material_options:
                     box = layout.box()
                     box.label(text = "Material Options", icon = "MATERIAL")
-                    box.prop(mat, "msfs_roughness")
-                    box.prop(mat, "msfs_metallic")
+                    box.prop(mat, "msfs_roughness_factor")
+                    box.prop(mat, "msfs_metallic_factor")
                     box.prop(mat, "msfs_normal_scale")
                     if mat.msfs_alpha_mode == "MASK" and mat.msfs_show_alpha_mode:
                         box.prop(mat, "msfs_alpha_cutoff")
