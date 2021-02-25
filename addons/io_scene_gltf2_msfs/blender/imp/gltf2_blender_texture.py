@@ -24,7 +24,7 @@ def texture(
     tex_info,
     location, # Upper-right corner of the TexImage node
     label, # Label for the TexImg node
-    color_socket,
+    color_socket=None,
     alpha_socket=None,
     is_data=False,
 ):
@@ -56,7 +56,34 @@ def texture(
         pyimg = mh.gltf.data.images[source]
         blender_image_name = pyimg.blender_image_name
         if blender_image_name:
-            tex_img.image = bpy.data.images[blender_image_name]
+            blender_image = bpy.data.images[blender_image_name]
+            tex_img.image = blender_image
+        
+            if label == 'EMISSIVE':
+                mh.mat.msfs_emissive_texture = blender_image
+            elif label == 'BASE COLOR' or label == 'DIFFUSE':
+                mh.mat.msfs_base_color_texture = blender_image
+            elif label == 'DETAIL COLOR' or label == 'DETAIL DIFFUSE':
+                mh.mat.msfs_detail_color_texture = blender_image
+            elif label == 'METALLIC ROUGHNESS':
+                mh.mat.msfs_comp_texture = blender_image
+            elif label == 'DETAIL METALLIC ROUGHNESS':
+                mh.mat.msfs_detail_comp_texture = blender_image
+            elif label == 'NORMALMAP':
+                mh.mat.msfs_normal_texture = blender_image
+            elif label == 'DETAIL NORMALMAP':
+                mh.mat.msfs_detail_normal_texture = blender_image
+            elif label == 'OCCLUSION':
+                mh.mat.msfs_comp_texture = blender_image
+            elif label == 'DETAIL OCCLUSION':
+                mh.mat.msfs_detail_comp_texture = blender_image
+            elif label == 'BLEND MASK':
+                mh.mat.msfs_blend_mask_texture = blender_image
+            elif label == 'WETNESS AO':
+                mh.mat.msfs_wetness_ao_texture = blender_image
+            elif label == 'DIRT':
+                mh.mat.msfs_dirt_texture = blender_image
+
     # Set colorspace for data images
     if is_data:
         if tex_img.image:
@@ -64,7 +91,8 @@ def texture(
     # Set filtering
     set_filtering(tex_img, pysampler)
     # Outputs
-    mh.node_tree.links.new(color_socket, tex_img.outputs['Color'])
+    if color_socket is not None:
+        mh.node_tree.links.new(color_socket, tex_img.outputs['Color'])
     if alpha_socket is not None:
         mh.node_tree.links.new(alpha_socket, tex_img.outputs['Alpha'])
     # Inputs
@@ -173,6 +201,8 @@ def texture(
         uv_map.uv_map = 'UVMap' if uv_idx == 0 else 'UVMap.%03d' % uv_idx
         # Outputs
         mh.node_tree.links.new(uv_socket, uv_map.outputs[0])
+
+    return tex_img
 
 def set_filtering(tex_img, pysampler):
     """Set the filtering/interpolation on an Image Texture from the glTf sampler."""

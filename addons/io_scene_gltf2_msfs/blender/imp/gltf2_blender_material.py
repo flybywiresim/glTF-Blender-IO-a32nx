@@ -34,11 +34,10 @@ class BlenderMaterial():
         if name is None:
             name = "Material_" + str(material_idx)
 
-        msfs_material_type = BlenderMaterial.determine_msfs_material_type(pymaterial)
-
         mat = bpy.data.materials.new(name)
         pymaterial.blender_material[vertex_color] = mat.name
-        mat.msfs_material_type = msfs_material_type
+        mat.is_import = True # this prevents the property callbacks from running during import, since that would be pointless
+        mat.msfs_material_type = BlenderMaterial.determine_msfs_material_type(pymaterial)
 
         set_extras(mat, pymaterial.extras)
         BlenderMaterial.set_double_sided(pymaterial, mat)
@@ -59,9 +58,13 @@ class BlenderMaterial():
         else:
             pbr_metallic_roughness(mh)
 
+        mat.is_import = False # once we're done setting things we can treat this as a normal material
+
     @staticmethod
     def set_double_sided(pymaterial, mat):
         mat.use_backface_culling = (pymaterial.double_sided != True)
+        if pymaterial.double_sided is not None:
+            mat.msfs_double_sided = pymaterial.double_sided
 
     @staticmethod
     def set_alpha_mode(pymaterial, mat):
@@ -73,6 +76,9 @@ class BlenderMaterial():
             alpha_cutoff = pymaterial.alpha_cutoff
             alpha_cutoff = alpha_cutoff if alpha_cutoff is not None else 0.5
             mat.alpha_threshold = alpha_cutoff
+        
+        if alpha_mode is not None:
+            mat.msfs_alpha_mode = alpha_mode
 
     @staticmethod
     def set_viewport_color(pymaterial, mat, vertex_color):
@@ -92,9 +98,10 @@ class BlenderMaterial():
             color = pbr.base_color_factor or [1, 1, 1, 1]
 
         mat.diffuse_color = color
+        mat.msfs_base_color_factor = color
 
     @staticmethod
-    def determine_msfs_material_type(pymaterial):
+    def determine_msfs_material_type(pymaterial): # It appears that sometimes a material can have multiple material extensions. This shouldn't be an issue, but should be investigated in the future
         extras = pymaterial.extras
         extensions = pymaterial.extensions
         material_type = "msfs_standard"

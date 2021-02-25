@@ -82,7 +82,7 @@ class BlenderImage():
                 blender_image = _placeholder_image(img_name, os.path.abspath(path))
                 is_placeholder = True
 
-            if is_dds and label == "NORMALMAP":
+            if is_dds and (label == 'NORMALMAP' or label == 'DETAIL NORMALMAP'):
                 BlenderImage.convert_normal_map(blender_image)
 
             if len(bpy.data.images) != num_images:  # If created a new image
