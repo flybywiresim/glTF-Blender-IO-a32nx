@@ -198,6 +198,15 @@ class GlTF2Exporter:
         self.__traverse(animation)
 
     def add_asobo_asset_extensions(self, extensions):
+        """
+        Add Asobo asset extensions to the glTF.
+
+        :param animation: glTF extensions in a dictionary
+        :return: nothing
+        """
+        if self.__finalized:
+            raise RuntimeError("Tried to add Asobo asset extensions to finalized glTF file")
+
         for key, value in extensions.items():
             self.__gltf.asset.extensions[key] = value
 
