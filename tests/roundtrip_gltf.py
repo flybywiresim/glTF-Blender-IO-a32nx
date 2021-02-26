@@ -42,9 +42,9 @@ try:
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     if '--no-sample-anim' in argv:
-        bpy.ops.export_scene.gltf_msfs(export_format=export_format, filepath=os.path.join(output_dir, path_parts[1]), export_force_sampling=False)
+        bpy.ops.export_scene.gltf_msfs(export_format=export_format, filepath=os.path.join(output_dir, path_parts[1]), export_force_sampling=False, emulate_asobo_optimization=False)
     else:
-        bpy.ops.export_scene.gltf_msfs(export_format=export_format, filepath=os.path.join(output_dir, path_parts[1]))
+        bpy.ops.export_scene.gltf_msfs(export_format=export_format, filepath=os.path.join(output_dir, path_parts[1]), emulate_asobo_optimization=False)
 except Exception as err:
     print(err, file=sys.stderr)
     sys.exit(1)
