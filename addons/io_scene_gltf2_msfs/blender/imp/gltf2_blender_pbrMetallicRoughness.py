@@ -573,14 +573,20 @@ def normal(mh: MaterialHelper, location, normal_socket):
     node = mh.node_tree.nodes.new('ShaderNodeNormalMap')
     node.location = x - 150, y - 40
     # Set UVMap
-    uv_idx = normal_texture.tex_coord or 0
-    try:
-        uv_idx = normal_texture.extensions['KHR_texture_transform']['texCoord']
-    except Exception:
-        pass
+    if normal_texture is None:
+        uv_idx = 0
+    else:
+        uv_idx = normal_texture.tex_coord or 0
+        try:
+            uv_idx = normal_texture.extensions['KHR_texture_transform']['texCoord']
+        except Exception:
+            pass
     node.uv_map = 'UVMap' if uv_idx == 0 else 'UVMap.%03d' % uv_idx
     # Set strength
-    scale = normal_texture.scale
+    if normal_texture is None:
+        scale = None
+    else:
+        scale = normal_texture.scale
     scale = scale if scale is not None else 1
     node.inputs['Strength'].default_value = scale
     # Outputs
