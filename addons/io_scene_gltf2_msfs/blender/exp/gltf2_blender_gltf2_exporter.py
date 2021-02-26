@@ -197,6 +197,13 @@ class GlTF2Exporter:
 
         self.__traverse(animation)
 
+    def add_asobo_asset_extensions(self, extensions):
+        for key, value in extensions.items():
+            self.__gltf.asset.extensions[key] = value
+
+            # Add extension to extensions used
+            self.add_extensions_used(key)
+
     def __to_reference(self, property):
         """
         Append a child of root property to its respective list and return a reference into said list.
@@ -211,6 +218,16 @@ class GlTF2Exporter:
             return property
 
         return self.__append_unique_and_get_index(gltf_list, property)
+
+    def add_extensions_required(self, extensions):
+        for extension in extensions:
+            if extension not in self.__gltf.extensions_required:
+                self.__gltf.extensions_required.append(extension)
+
+    def add_extensions_used(self, extensions):
+        for extension in extensions:
+            if extension not in self.__gltf.extensions_used:
+                self.__gltf.extensions_used.append(extension)
 
     @staticmethod
     def __append_unique_and_get_index(target: list, obj):

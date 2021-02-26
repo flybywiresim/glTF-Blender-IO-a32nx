@@ -133,7 +133,7 @@ class ExportGLTF2_Base:
             'Output format and embedding options. Binary is most efficient, '
             'but JSON (embedded or separate) may be easier to edit later'
         ),
-        default='GLB',
+        default='GLTF_SEPARATE',
         update=on_export_format_changed,
     )
 
@@ -410,6 +410,13 @@ class ExportGLTF2_Base:
         default=False
     )
 
+    emulate_asobo_optimization: BoolProperty(
+        name='Emulate Asobo Optimization',
+        description='Replicate the Asobo build process. '
+                    'If you enable this, you will not need to build the model',
+        default=True
+    )
+
     will_save_settings: BoolProperty(
         name='Remember Export Settings',
         description='Store glTF export settings in the Blender project',
@@ -572,6 +579,9 @@ class ExportGLTF2_Base:
         export_settings['gltf_binaryfilename'] = (
             os.path.splitext(os.path.basename(self.filepath))[0] + '.bin'
         )
+
+        # MSFS
+        export_settings['emulate_asobo_optimization'] = self.emulate_asobo_optimization
 
         user_extensions = []
         pre_export_callbacks = []
@@ -920,6 +930,30 @@ class GLTFMSFS_PT_export_user_extensions(bpy.types.Panel):
         layout.use_property_split = True
         layout.use_property_decorate = False  # No animation.
 
+class GLTFMSFS_PT_export_msfs(bpy.types.Panel):
+    bl_space_type = 'FILE_BROWSER'
+    bl_region_type = 'TOOL_PROPS'
+    bl_label = "Flight Simulator"
+    bl_parent_id = "FILE_PT_operator"
+    bl_options = {'DEFAULT_CLOSED'}
+
+    @classmethod
+    def poll(cls, context):
+        sfile = context.space_data
+        operator = sfile.active_operator
+
+        return operator.bl_idname == "EXPORT_SCENE_OT_gltf_msfs"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.use_property_split = True
+        layout.use_property_decorate = False  # No animation.
+
+        sfile = context.space_data
+        operator = sfile.active_operator
+
+        layout.prop(operator, 'emulate_asobo_optimization')
+
 
 class ExportMSFSGLTF2(bpy.types.Operator, ExportGLTF2_Base, ExportHelper):
     """Export scene as glTF 2.0 file for MSFS"""
@@ -1171,6 +1205,7 @@ classes = (
     GLTFMSFS_PT_export_animation_shapekeys,
     GLTFMSFS_PT_export_animation_skinning,
     GLTFMSFS_PT_export_user_extensions,
+    GLTFMSFS_PT_export_msfs,
     ImportMSFSGLTF2,
     ImporterExporterPreferences
 )

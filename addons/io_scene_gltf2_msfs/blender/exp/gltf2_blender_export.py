@@ -69,6 +69,14 @@ def __export(export_settings):
 
 
 def __gather_gltf(exporter, export_settings):
+    if export_settings['emulate_asobo_optimization']:
+        export_settings['bounding_box_max_x'] = 0
+        export_settings['bounding_box_max_y'] = 0
+        export_settings['bounding_box_max_z'] = 0
+        export_settings['bounding_box_min_x'] = 0
+        export_settings['bounding_box_min_y'] = 0
+        export_settings['bounding_box_min_z'] = 0
+
     active_scene_idx, scenes, animations = gltf2_blender_gather.gather_gltf2(export_settings)
 
     plan = {'active_scene_idx': active_scene_idx, 'scenes': scenes, 'animations': animations}
@@ -83,6 +91,33 @@ def __gather_gltf(exporter, export_settings):
         exporter.add_scene(scene, idx==active_scene_idx)
     for animation in animations:
         exporter.add_animation(animation)
+
+    # Add asobo extensions
+    if export_settings['emulate_asobo_optimization']:
+        bounding_box_max = [
+            export_settings['bounding_box_max_x'],
+            export_settings['bounding_box_max_y'],
+            export_settings['bounding_box_max_z'],
+        ]
+        bounding_box_min = [
+            export_settings['bounding_box_min_x'],
+            export_settings['bounding_box_min_y'],
+            export_settings['bounding_box_min_z'],
+        ]
+
+        extensions = {
+            "ASOBO_asset_optimized": {
+                "BoundingBoxMax": bounding_box_max,
+                "BoundingBoxMin": bounding_box_min,
+                "MajorVersion": 4,
+                "MinorVersion": 2
+            },
+            "ASOBO_normal_map_convention": {
+                "tangent_space_convention": "DirectX"
+            }
+        }
+
+        exporter.add_asobo_asset_extensions(extensions)
 
 
 def __create_buffer(exporter, export_settings):
