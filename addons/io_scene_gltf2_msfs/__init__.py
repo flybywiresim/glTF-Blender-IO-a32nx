@@ -100,7 +100,7 @@ def on_export_format_changed(self, context):
         return
     if not sfile.active_operator:
         return
-    if sfile.active_operator.bl_idname != "EXPORT_SCENE_OT_gltf":
+    if sfile.active_operator.bl_idname != "EXPORT_SCENE_OT_gltf_msfs":
         return
 
     sfile.params.filename = ensure_filepath_matches_export_format(
@@ -416,7 +416,7 @@ class ExportGLTF2_Base:
         default=False)
 
     # Custom scene property for saving settings
-    scene_key = "glTF2ExportSettings"
+    scene_key = "glTF2MSFSExportSettings"
 
     #
 
@@ -605,7 +605,7 @@ class ExportGLTF2_Base:
         pass # Is needed to get panels available
 
 
-class GLTF_PT_export_main(bpy.types.Panel):
+class GLTFMSFS_PT_export_main(bpy.types.Panel):
     bl_space_type = 'FILE_BROWSER'
     bl_region_type = 'TOOL_PROPS'
     bl_label = ""
@@ -617,7 +617,7 @@ class GLTF_PT_export_main(bpy.types.Panel):
         sfile = context.space_data
         operator = sfile.active_operator
 
-        return operator.bl_idname == "EXPORT_SCENE_OT_gltf"
+        return operator.bl_idname == "EXPORT_SCENE_OT_gltf_msfs"
 
     def draw(self, context):
         layout = self.layout
@@ -634,7 +634,7 @@ class GLTF_PT_export_main(bpy.types.Panel):
         layout.prop(operator, 'will_save_settings')
 
 
-class GLTF_PT_export_include(bpy.types.Panel):
+class GLTFMSFS_PT_export_include(bpy.types.Panel):
     bl_space_type = 'FILE_BROWSER'
     bl_region_type = 'TOOL_PROPS'
     bl_label = "Include"
@@ -646,7 +646,7 @@ class GLTF_PT_export_include(bpy.types.Panel):
         sfile = context.space_data
         operator = sfile.active_operator
 
-        return operator.bl_idname == "EXPORT_SCENE_OT_gltf"
+        return operator.bl_idname == "EXPORT_SCENE_OT_gltf_msfs"
 
     def draw(self, context):
         layout = self.layout
@@ -665,7 +665,7 @@ class GLTF_PT_export_include(bpy.types.Panel):
         col.prop(operator, 'export_lights')
 
 
-class GLTF_PT_export_transform(bpy.types.Panel):
+class GLTFMSFS_PT_export_transform(bpy.types.Panel):
     bl_space_type = 'FILE_BROWSER'
     bl_region_type = 'TOOL_PROPS'
     bl_label = "Transform"
@@ -677,7 +677,7 @@ class GLTF_PT_export_transform(bpy.types.Panel):
         sfile = context.space_data
         operator = sfile.active_operator
 
-        return operator.bl_idname == "EXPORT_SCENE_OT_gltf"
+        return operator.bl_idname == "EXPORT_SCENE_OT_gltf_msfs"
 
     def draw(self, context):
         layout = self.layout
@@ -690,7 +690,7 @@ class GLTF_PT_export_transform(bpy.types.Panel):
         layout.prop(operator, 'export_yup')
 
 
-class GLTF_PT_export_geometry(bpy.types.Panel):
+class GLTFMSFS_PT_export_geometry(bpy.types.Panel):
     bl_space_type = 'FILE_BROWSER'
     bl_region_type = 'TOOL_PROPS'
     bl_label = "Geometry"
@@ -702,7 +702,7 @@ class GLTF_PT_export_geometry(bpy.types.Panel):
         sfile = context.space_data
         operator = sfile.active_operator
 
-        return operator.bl_idname == "EXPORT_SCENE_OT_gltf"
+        return operator.bl_idname == "EXPORT_SCENE_OT_gltf_msfs"
 
     def draw(self, context):
         layout = self.layout
@@ -730,11 +730,11 @@ class GLTF_PT_export_geometry(bpy.types.Panel):
         col.prop(operator, 'export_image_format')
 
 
-class GLTF_PT_export_geometry_compression(bpy.types.Panel):
+class GLTFMSFS_PT_export_geometry_compression(bpy.types.Panel):
     bl_space_type = 'FILE_BROWSER'
     bl_region_type = 'TOOL_PROPS'
     bl_label = "Compression"
-    bl_parent_id = "GLTF_PT_export_geometry"
+    bl_parent_id = "GLTFMSFS_PT_export_geometry"
     bl_options = {'DEFAULT_CLOSED'}
 
     def __init__(self):
@@ -746,7 +746,7 @@ class GLTF_PT_export_geometry_compression(bpy.types.Panel):
         sfile = context.space_data
         operator = sfile.active_operator
         if operator.is_draco_available:
-            return operator.bl_idname == "EXPORT_SCENE_OT_gltf"
+            return operator.bl_idname == "EXPORT_SCENE_OT_gltf_msfs"
 
     def draw_header(self, context):
         sfile = context.space_data
@@ -772,7 +772,7 @@ class GLTF_PT_export_geometry_compression(bpy.types.Panel):
         col.prop(operator, 'export_draco_generic_quantization', text="Generic")
 
 
-class GLTF_PT_export_animation(bpy.types.Panel):
+class GLTFMSFS_PT_export_animation(bpy.types.Panel):
     bl_space_type = 'FILE_BROWSER'
     bl_region_type = 'TOOL_PROPS'
     bl_label = "Animation"
@@ -784,7 +784,7 @@ class GLTF_PT_export_animation(bpy.types.Panel):
         sfile = context.space_data
         operator = sfile.active_operator
 
-        return operator.bl_idname == "EXPORT_SCENE_OT_gltf"
+        return operator.bl_idname == "EXPORT_SCENE_OT_gltf_msfs"
 
     def draw(self, context):
         layout = self.layout
@@ -797,11 +797,11 @@ class GLTF_PT_export_animation(bpy.types.Panel):
         layout.prop(operator, 'export_current_frame')
 
 
-class GLTF_PT_export_animation_export(bpy.types.Panel):
+class GLTFMSFS_PT_export_animation_export(bpy.types.Panel):
     bl_space_type = 'FILE_BROWSER'
     bl_region_type = 'TOOL_PROPS'
     bl_label = "Animation"
-    bl_parent_id = "GLTF_PT_export_animation"
+    bl_parent_id = "GLTFMSFS_PT_export_animation"
     bl_options = {'DEFAULT_CLOSED'}
 
     @classmethod
@@ -809,7 +809,7 @@ class GLTF_PT_export_animation_export(bpy.types.Panel):
         sfile = context.space_data
         operator = sfile.active_operator
 
-        return operator.bl_idname == "EXPORT_SCENE_OT_gltf"
+        return operator.bl_idname == "EXPORT_SCENE_OT_gltf_msfs"
 
     def draw_header(self, context):
         sfile = context.space_data
@@ -836,11 +836,11 @@ class GLTF_PT_export_animation_export(bpy.types.Panel):
         row.prop(operator, 'export_def_bones')
 
 
-class GLTF_PT_export_animation_shapekeys(bpy.types.Panel):
+class GLTFMSFS_PT_export_animation_shapekeys(bpy.types.Panel):
     bl_space_type = 'FILE_BROWSER'
     bl_region_type = 'TOOL_PROPS'
     bl_label = "Shape Keys"
-    bl_parent_id = "GLTF_PT_export_animation"
+    bl_parent_id = "GLTFMSFS_PT_export_animation"
     bl_options = {'DEFAULT_CLOSED'}
 
     @classmethod
@@ -848,7 +848,7 @@ class GLTF_PT_export_animation_shapekeys(bpy.types.Panel):
         sfile = context.space_data
         operator = sfile.active_operator
 
-        return operator.bl_idname == "EXPORT_SCENE_OT_gltf"
+        return operator.bl_idname == "EXPORT_SCENE_OT_gltf_msfs"
 
     def draw_header(self, context):
         sfile = context.space_data
@@ -871,11 +871,11 @@ class GLTF_PT_export_animation_shapekeys(bpy.types.Panel):
         col.prop(operator, 'export_morph_tangent')
 
 
-class GLTF_PT_export_animation_skinning(bpy.types.Panel):
+class GLTFMSFS_PT_export_animation_skinning(bpy.types.Panel):
     bl_space_type = 'FILE_BROWSER'
     bl_region_type = 'TOOL_PROPS'
     bl_label = "Skinning"
-    bl_parent_id = "GLTF_PT_export_animation"
+    bl_parent_id = "GLTFMSFS_PT_export_animation"
     bl_options = {'DEFAULT_CLOSED'}
 
     @classmethod
@@ -883,7 +883,7 @@ class GLTF_PT_export_animation_skinning(bpy.types.Panel):
         sfile = context.space_data
         operator = sfile.active_operator
 
-        return operator.bl_idname == "EXPORT_SCENE_OT_gltf"
+        return operator.bl_idname == "EXPORT_SCENE_OT_gltf_msfs"
 
     def draw_header(self, context):
         sfile = context.space_data
@@ -901,7 +901,7 @@ class GLTF_PT_export_animation_skinning(bpy.types.Panel):
         layout.active = operator.export_skins
         layout.prop(operator, 'export_all_influences')
 
-class GLTF_PT_export_user_extensions(bpy.types.Panel):
+class GLTFMSFS_PT_export_user_extensions(bpy.types.Panel):
     bl_space_type = 'FILE_BROWSER'
     bl_region_type = 'TOOL_PROPS'
     bl_label = "Extensions"
@@ -913,7 +913,7 @@ class GLTF_PT_export_user_extensions(bpy.types.Panel):
         sfile = context.space_data
         operator = sfile.active_operator
 
-        return operator.bl_idname == "EXPORT_SCENE_OT_gltf" and operator.has_active_extensions
+        return operator.bl_idname == "EXPORT_SCENE_OT_gltf_msfs" and operator.has_active_extensions
 
     def draw(self, context):
         layout = self.layout
@@ -921,7 +921,7 @@ class GLTF_PT_export_user_extensions(bpy.types.Panel):
         layout.use_property_decorate = False  # No animation.
 
 
-class ExportGLTF2(bpy.types.Operator, ExportGLTF2_Base, ExportHelper):
+class ExportMSFSGLTF2(bpy.types.Operator, ExportGLTF2_Base, ExportHelper):
     """Export scene as glTF 2.0 file for MSFS"""
     bl_idname = 'export_scene.gltf_msfs'
     bl_label = 'Export glTF 2.0 for MSFS'
@@ -932,10 +932,10 @@ class ExportGLTF2(bpy.types.Operator, ExportGLTF2_Base, ExportHelper):
 
 
 def menu_func_export(self, context):
-    self.layout.operator(ExportGLTF2.bl_idname, text='glTF 2.0 for MSFS (.glb/.gltf)')
+    self.layout.operator(ExportMSFSGLTF2.bl_idname, text='glTF 2.0 for MSFS (.glb/.gltf)')
 
 
-class ImportGLTF2(Operator, ImportHelper):
+class ImportMSFSGLTF2(Operator, ImportHelper):
     """Load a glTF 2.0 file for MSFS"""
     bl_idname = 'import_scene.gltf_msfs'
     bl_label = 'Import glTF 2.0 for MSFS'
@@ -1156,22 +1156,22 @@ class ImporterExporterPreferences(AddonPreferences):
             row.label(text='No valid Flight Simulator path entered. Texture import is disabled', icon='ERROR')
     
 def menu_func_import(self, context):
-    self.layout.operator(ImportGLTF2.bl_idname, text='glTF 2.0 for MSFS (.glb/.gltf)')
+    self.layout.operator(ImportMSFSGLTF2.bl_idname, text='glTF 2.0 for MSFS (.glb/.gltf)')
 
 
 classes = (
-    ExportGLTF2,
-    GLTF_PT_export_main,
-    GLTF_PT_export_include,
-    GLTF_PT_export_transform,
-    GLTF_PT_export_geometry,
-    GLTF_PT_export_geometry_compression,
-    GLTF_PT_export_animation,
-    GLTF_PT_export_animation_export,
-    GLTF_PT_export_animation_shapekeys,
-    GLTF_PT_export_animation_skinning,
-    GLTF_PT_export_user_extensions,
-    ImportGLTF2,
+    ExportMSFSGLTF2,
+    GLTFMSFS_PT_export_main,
+    GLTFMSFS_PT_export_include,
+    GLTFMSFS_PT_export_transform,
+    GLTFMSFS_PT_export_geometry,
+    GLTFMSFS_PT_export_geometry_compression,
+    GLTFMSFS_PT_export_animation,
+    GLTFMSFS_PT_export_animation_export,
+    GLTFMSFS_PT_export_animation_shapekeys,
+    GLTFMSFS_PT_export_animation_skinning,
+    GLTFMSFS_PT_export_user_extensions,
+    ImportMSFSGLTF2,
     ImporterExporterPreferences
 )
 

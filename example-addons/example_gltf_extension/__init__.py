@@ -67,19 +67,19 @@ def unregister():
     bpy.utils.unregister_class(ExampleExtensionProperties)
     del bpy.types.Scene.ExampleExtensionProperties
 
-class GLTF_PT_UserExtensionPanel(bpy.types.Panel):
+class GLTFMSFS_PT_UserExtensionPanel(bpy.types.Panel):
 
     bl_space_type = 'FILE_BROWSER'
     bl_region_type = 'TOOL_PROPS'
     bl_label = "Enabled"
-    bl_parent_id = "GLTF_PT_export_user_extensions"
+    bl_parent_id = "GLTFMSFS_PT_export_user_extensions"
     bl_options = {'DEFAULT_CLOSED'}
 
     @classmethod
     def poll(cls, context):
         sfile = context.space_data
         operator = sfile.active_operator
-        return operator.bl_idname == "EXPORT_SCENE_OT_gltf"
+        return operator.bl_idname == "EXPORT_SCENE_OT_gltf_msfs"
 
     def draw_header(self, context):
         props = bpy.context.scene.ExampleExtensionProperties

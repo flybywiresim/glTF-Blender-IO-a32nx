@@ -34,7 +34,7 @@ try:
         os.makedirs(output_dir)
     args = {
         # Settings from "Remember Export Settings"
-        **dict(bpy.context.scene.get('glTF2ExportSettings', {})),
+        **dict(bpy.context.scene.get('glTF2ExportSettings', {})), # This may cause issues down the line - since the test .blend files were saved with the glTF2ExportSettings property, but we use glTF2MSFSExportSettings
 
         'export_format': ('GLB' if extension == '.glb' else 'GLTF_SEPARATE'),
         'filepath': os.path.join(output_dir, path_parts[1]),
