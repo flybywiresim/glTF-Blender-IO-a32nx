@@ -218,11 +218,7 @@ def extract_primitives(glTF, blender_mesh, library, blender_object, blender_vert
 
         if export_settings['emulate_asobo_optimization']:
             for loc in locs[blender_idxs]:
-                location = None
-                if export_settings[gltf2_blender_export_keys.YUP]:
-                    location = Vector((loc[0], loc[2], -loc[1]))
-                else:
-                    location = Vector((loc[0], loc[1], loc[2]))
+                location = Vector((loc[0], loc[1], loc[2]))
 
                 export_settings['bounding_box_max_x'] = max(location.x, export_settings['bounding_box_max_x'])
                 export_settings['bounding_box_max_y'] = max(location.y, export_settings['bounding_box_max_y'])
