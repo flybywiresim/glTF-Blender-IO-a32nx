@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import bpy
-import numpy
 from bpy.types import Material
 from ..com.gltf2_blender_material_helpers import get_gltf_node_name
 

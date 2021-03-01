@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import bpy
-import numpy
+import numpy as np
 from bpy.types import Material
 from ..com.gltf2_blender_material_helpers import get_gltf_node_name
 from . import gltf2_blender_flight_sim_material_utilities as utilities
@@ -540,7 +540,7 @@ def blend_mask(mat, location):
         # if the entire alpha layer is all white we treat it as no alpha channel, and use the color channels as the blend mask
         width = blend_mask_texture.size[0]
         height = blend_mask_texture.size[1]
-        pixels = numpy.empty(width * height * 4, dtype=numpy.float32)
+        pixels = np.empty(width * height * 4, dtype=np.float32)
         blend_mask_texture.pixels.foreach_get(pixels)
         pixels = pixels.reshape((-1, 4))
         alpha_pixels = pixels[:, -1]

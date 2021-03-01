@@ -22,7 +22,7 @@ import pathlib
 import configparser
 import codecs
 import subprocess
-import numpy
+import numpy as np
 
 from ...io.imp.gltf2_io_binary import BinaryData
 from ...io.com import gltf2_io_debug
@@ -106,12 +106,12 @@ class BlenderImage():
         # asobo normal maps have no z (blue) channel, so we have to calculate one, as well as flip the y (green) channel
         width = normal_image.size[0]
         height = normal_image.size[1]
-        pixels = numpy.empty(width * height * 4, dtype=numpy.float32)
+        pixels = np.empty(width * height * 4, dtype=np.float32)
         normal_image.pixels.foreach_get(pixels)
         pixels = pixels.reshape((-1, 4))
         rgb_pixels = pixels[:, 0:3]
         rgb_pixels[:, 1] = 1.0 - rgb_pixels[:, 1]
-        rgb_pixels[:, 2] = numpy.sqrt(
+        rgb_pixels[:, 2] = np.sqrt(
             1 - (rgb_pixels[:, 0] - 0.5) ** 2 - (rgb_pixels[:, 1] - 0.5) ** 2
         )
         pixel_data = pixels.reshape((-1, 1)).transpose()[0]
