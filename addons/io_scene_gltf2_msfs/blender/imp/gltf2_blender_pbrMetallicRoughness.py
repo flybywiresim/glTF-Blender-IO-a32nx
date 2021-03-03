@@ -626,7 +626,7 @@ def normal(mh: MaterialHelper, location, normal_socket):
     if detail_normal_texture is not None:
         texture(
             mh,
-            tex_info=normal_texture,
+            tex_info=detail_normal_texture,
             label='DETAIL NORMALMAP',
             location=(x, y) if normal_texture is None else (x, y - 150),
             is_data=True,
