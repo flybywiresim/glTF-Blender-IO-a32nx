@@ -14,8 +14,10 @@
 
 import typing
 import array
+import struct
 from io_scene_gltf2_msfs.io.com import gltf2_io_constants
 
+STRUCT_HALF = struct.Struct('e')
 
 class BinaryData:
     """Store for gltf binary data that can later be stored in a buffer."""
@@ -32,8 +34,18 @@ class BinaryData:
         return hash(self.data)
 
     @classmethod
-    def from_list(cls, lst: typing.List[typing.Any], gltf_component_type: gltf2_io_constants.ComponentType):
-        format_char = gltf2_io_constants.ComponentType.to_type_code(gltf_component_type)
+    def from_list(cls, lst: typing.List[typing.Any], gltf_component_type: gltf2_io_constants.ComponentType, emulate_asobo_optimization=False):
+        if emulate_asobo_optimization: # Since Asobo uses a different data type for a certain component, we need to check if that's the case
+            format_char = gltf2_io_constants.ComponentType.to_type_code_asobo(gltf_component_type)
+            if format_char == 'e':
+                # 2 byte float, not supported by array.array()
+                data = b''
+                for x in lst:
+                    data += STRUCT_HALF.pack(x)
+                return BinaryData(data)
+        else:
+            format_char = gltf2_io_constants.ComponentType.to_type_code(gltf_component_type)
+
         return BinaryData(array.array(format_char, lst).tobytes())
 
     @property

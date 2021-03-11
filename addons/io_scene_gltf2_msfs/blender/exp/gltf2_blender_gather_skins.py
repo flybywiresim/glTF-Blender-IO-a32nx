@@ -112,7 +112,7 @@ def __gather_inverse_bind_matrices(blender_object, export_settings):
             for row in range(0, 4):
                 inverse_matrices.append(matrix[row][column])
 
-    binary_data = gltf2_io_binary_data.BinaryData.from_list(inverse_matrices, gltf2_io_constants.ComponentType.Float)
+    binary_data = gltf2_io_binary_data.BinaryData.from_list(inverse_matrices, gltf2_io_constants.ComponentType.Float, emulate_asobo_optimization=export_settings['emulate_asobo_optimization'])
     return gltf2_blender_gather_accessors.gather_accessor(
         binary_data,
         gltf2_io_constants.ComponentType.Float,

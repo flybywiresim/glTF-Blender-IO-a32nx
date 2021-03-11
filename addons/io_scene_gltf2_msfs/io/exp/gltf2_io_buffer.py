@@ -48,6 +48,17 @@ class Buffer:
         )
         return buffer_view
 
+    def add(self, data) -> gltf2_io.BufferView:
+        """Add binary data to the buffer."""
+        offset = len(self.__data)
+        self.__data += data
+
+        # offsets should be a multiple of 4 --> therefore add padding if necessary
+        padding = (4 - (len(data) % 4)) % 4
+        self.__data += b"\x00" * padding
+
+        return offset
+
     @property
     def byte_length(self):
         return len(self.__data)

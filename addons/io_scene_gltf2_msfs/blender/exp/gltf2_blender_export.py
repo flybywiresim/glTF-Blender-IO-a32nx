@@ -24,6 +24,7 @@ from io_scene_gltf2_msfs.blender.exp.gltf2_blender_gltf2_exporter import GlTF2Ex
 from io_scene_gltf2_msfs.io.com.gltf2_io_debug import print_console, print_newline
 from io_scene_gltf2_msfs.io.exp import gltf2_io_export
 from io_scene_gltf2_msfs.io.exp import gltf2_io_draco_compression_extension
+from io_scene_gltf2_msfs.io.exp import gltf2_io_asobo_buffer_views
 from io_scene_gltf2_msfs.io.exp.gltf2_io_user_extensions import export_user_extensions
 
 
@@ -86,6 +87,11 @@ def __gather_gltf(exporter, export_settings):
     if export_settings['gltf_draco_mesh_compression']:
         gltf2_io_draco_compression_extension.encode_scene_primitives(scenes, export_settings)
         exporter.add_draco_extension()
+
+    if export_settings['emulate_asobo_optimization']: # Prepare the primitives and buffer views for the simulator
+        buffer_views = gltf2_io_asobo_buffer_views.AsoboBufferViews()
+        buffer_views.traverse_scenes(scenes)
+        exporter.add_asobo_buffer_views(buffer_views.BufferViews)
 
     for idx, scene in enumerate(scenes):
         exporter.add_scene(scene, idx==active_scene_idx)

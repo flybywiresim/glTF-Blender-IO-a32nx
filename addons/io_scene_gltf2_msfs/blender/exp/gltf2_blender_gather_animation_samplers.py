@@ -245,7 +245,7 @@ def __gather_input(channels: typing.Tuple[bpy.types.FCurve],
     times = [k.seconds for k in keyframes]
 
     return gltf2_blender_gather_accessors.gather_accessor(
-        gltf2_io_binary_data.BinaryData.from_list(times, gltf2_io_constants.ComponentType.Float),
+        gltf2_io_binary_data.BinaryData.from_list(times, gltf2_io_constants.ComponentType.Float, emulate_asobo_optimization=export_settings['emulate_asobo_optimization']),
         gltf2_io_constants.ComponentType.Float,
         len(times),
         tuple([max(times)]),
@@ -403,7 +403,7 @@ def __gather_output(channels: typing.Tuple[bpy.types.FCurve],
         data_type = gltf2_io_constants.DataType.vec_type_from_num(len(keyframes[0].value))
 
     return gltf2_io.Accessor(
-        buffer_view=gltf2_io_binary_data.BinaryData.from_list(values, component_type),
+        buffer_view=gltf2_io_binary_data.BinaryData.from_list(values, component_type, emulate_asobo_optimization=export_settings['emulate_asobo_optimization']),
         byte_offset=None,
         component_type=component_type,
         count=len(values) // gltf2_io_constants.DataType.num_elements(data_type),

@@ -29,7 +29,7 @@ def extract_primitives(glTF, blender_mesh, library, blender_object, blender_vert
         blender_mesh.calc_normals_split()
 
     use_tangents = False
-    if use_normals and export_settings[gltf2_blender_export_keys.TANGENTS]:
+    if use_normals and (export_settings[gltf2_blender_export_keys.TANGENTS] or export_settings['emulate_asobo_optimization']): # Always export tangents for optimized meshes
         if blender_mesh.uv_layers.active and len(blender_mesh.uv_layers) > 0:
             try:
                 blender_mesh.calc_tangents()
@@ -38,17 +38,25 @@ def extract_primitives(glTF, blender_mesh, library, blender_object, blender_vert
                 print_console('WARNING', 'Could not calculate tangents. Please try to triangulate the mesh first.')
 
     tex_coord_max = 0
-    if export_settings[gltf2_blender_export_keys.TEX_COORDS]:
+    if export_settings[gltf2_blender_export_keys.TEX_COORDS] or export_settings['emulate_asobo_optimization']: # Always export tex coords for optimized meshes
         if blender_mesh.uv_layers.active:
             tex_coord_max = len(blender_mesh.uv_layers)
 
+            if export_settings['emulate_asobo_optimization']: # If we're emulating the optimization, we need to include at least two tex coord attributes
+                if tex_coord_max < 2:
+                    tex_coord_max = 2
+
     color_max = 0
-    if export_settings[gltf2_blender_export_keys.COLORS]:
+    if export_settings[gltf2_blender_export_keys.COLORS] or export_settings['emulate_asobo_optimization']: # Always export colors for optimized meshes
         color_max = len(blender_mesh.vertex_colors)
+        
+        if export_settings['emulate_asobo_optimization']: # If we're emulating the optimization, we need to include at least one color attribute
+            if color_max == 0:
+                color_max = 1
 
     armature = None
     skin = None
-    if blender_vertex_groups and export_settings[gltf2_blender_export_keys.SKINS]:
+    if blender_vertex_groups and (export_settings[gltf2_blender_export_keys.SKINS] or export_settings['emulate_asobo_optimization']): # Always export skins for optimized meshes
         if modifiers is not None:
             modifiers_dict = {m.type: m for m in modifiers}
             if "ARMATURE" in modifiers_dict:
@@ -72,8 +80,8 @@ def extract_primitives(glTF, blender_mesh, library, blender_object, blender_vert
             if not skin:
                 armature = None
 
-    use_morph_normals = use_normals and export_settings[gltf2_blender_export_keys.MORPH_NORMAL]
-    use_morph_tangents = use_morph_normals and use_tangents and export_settings[gltf2_blender_export_keys.MORPH_TANGENT]
+    use_morph_normals = use_normals and export_settings[gltf2_blender_export_keys.MORPH_NORMAL] and not export_settings['emulate_asobo_optimization'] # MSFS doesn't support morph targets
+    use_morph_tangents = use_morph_normals and use_tangents and export_settings[gltf2_blender_export_keys.MORPH_TANGENT] and not export_settings['emulate_asobo_optimization']
 
     key_blocks = []
     if blender_mesh.shape_keys and export_settings[gltf2_blender_export_keys.MORPH]:
@@ -158,13 +166,13 @@ def extract_primitives(glTF, blender_mesh, library, blender_object, blender_vert
         del signs
 
     for uv_i in range(tex_coord_max):
-        uvs = __get_uvs(blender_mesh, uv_i)
+        uvs = __get_uvs(blender_mesh, uv_i, export_settings)
         dots['uv%dx' % uv_i] = uvs[:, 0]
         dots['uv%dy' % uv_i] = uvs[:, 1]
         del uvs
 
     for col_i in range(color_max):
-        colors = __get_colors(blender_mesh, col_i)
+        colors = __get_colors(blender_mesh, col_i, export_settings)
         dots['color%dr' % col_i] = colors[:, 0]
         dots['color%dg' % col_i] = colors[:, 1]
         dots['color%db' % col_i] = colors[:, 2]
@@ -216,6 +224,8 @@ def extract_primitives(glTF, blender_mesh, library, blender_object, blender_vert
 
         attributes['POSITION'] = locs[blender_idxs]
 
+
+        vertex_type = None
         if export_settings['emulate_asobo_optimization']:
             for loc in locs[blender_idxs]:
                 location = Vector((loc[0], loc[1], loc[2]))
@@ -227,14 +237,38 @@ def extract_primitives(glTF, blender_mesh, library, blender_object, blender_vert
                 export_settings['bounding_box_min_y'] = min(location.y, export_settings['bounding_box_min_y'])
                 export_settings['bounding_box_min_z'] = min(location.z, export_settings['bounding_box_min_z'])
 
+            # Determine vertex type of the primitive
+            # There are 3 possible vertex types - VTX, BLEND1, and BLEND4.
+            # VTX - Unskinned meshes
+            # BLEND1 - Skinned meshes with 1 bone
+            # BLEND4 - Skinned meshes with 2-4 bones
+            vertex_type = 'VTX' # default is VTX
+
+            for vi in blender_idxs: # this function needs refactoring
+                vertex = blender_mesh.vertices[vi]
+                weight_count = len(list(filter(lambda x: x.weight > 0, vertex.groups)))
+                if weight_count > 1:
+                    vertex_type = 'BLEND4'
+                    break
+                elif weight_count == 1 and vertex_type == 'VTX':
+                    vertex_type = 'BLEND1'
+
         for morph_i, vs in enumerate(morph_locs):
             attributes['MORPH_POSITION_%d' % morph_i] = vs[blender_idxs]
 
         if use_normals:
-            normals = np.empty((len(prim_dots), 3), dtype=np.float32)
-            normals[:, 0] = prim_dots['nx']
-            normals[:, 1] = prim_dots['ny']
-            normals[:, 2] = prim_dots['nz']
+            if export_settings['emulate_asobo_optimization']:
+                # Asobo optimized meshes use a VEC4 for normals. The 4th value is there due to bit packing and alignment
+                normals = np.empty((len(prim_dots), 4), dtype=np.float32)
+                normals[:, 0] = prim_dots['nx']
+                normals[:, 1] = prim_dots['ny']
+                normals[:, 2] = prim_dots['nz']
+                normals[:, 3] = 0
+            else:
+                normals = np.empty((len(prim_dots), 3), dtype=np.float32)
+                normals[:, 0] = prim_dots['nx']
+                normals[:, 1] = prim_dots['ny']
+                normals[:, 2] = prim_dots['nz']
             attributes['NORMAL'] = normals
 
         if use_tangents:
@@ -282,19 +316,34 @@ def extract_primitives(glTF, blender_mesh, library, blender_object, blender_vert
                     else:
                         joint, weight = 0, 0.0
                     joints[j//4].append(joint)
-                    weights[j//4].append(weight)
+                    if vertex_type == 'BLEND1': # BLEND1 meshes dont have more than one bone influence, so we only need one weight per bone
+                        if j % 4 == 0: # Only add weight if we are at the start of a joint set
+                            weights[j].append(weight)
+                    else:
+                        weights[j//4].append(weight)
 
             for i, (js, ws) in enumerate(zip(joints, weights)):
                 attributes['JOINTS_%d' % i] = js
                 attributes['WEIGHTS_%d' % i] = ws
 
-        primitives.append({
-            'attributes': attributes,
-            'indices': indices,
-            'material': material_idx,
-        })
+        if export_settings['emulate_asobo_optimization']:
+            # We add 3 extra properties if emulating asobo optimization
+            primitives.append({
+                'attributes': attributes,
+                'indices': indices,
+                'mode': 4, # Asobo mesh primitives always have 4 as the mode (triangles)
+                'material': material_idx,
+                'VertexType': vertex_type,
+                'BaseVertexIndex': None,
+            })
+        else:
+            primitives.append({
+                'attributes': attributes,
+                'indices': indices,
+                'material': material_idx,
+            })
 
-    if export_settings['gltf_loose_edges']:
+    if export_settings['gltf_loose_edges'] and not export_settings['emulate_asobo_optimization']: # MSFS only supports primitive mode 4 (triangles)
         # Find loose edges
         loose_edges = [e for e in blender_mesh.edges if e.is_loose]
         blender_idxs = [vi for e in loose_edges for vi in e.vertices]
@@ -336,7 +385,7 @@ def extract_primitives(glTF, blender_mesh, library, blender_object, blender_vert
                 'material': 0,
             })
 
-    if export_settings['gltf_loose_points']:
+    if export_settings['gltf_loose_points'] and not export_settings['emulate_asobo_optimization']: # MSFS only supports primitive mode 4 (triangles)
         # Find loose points
         verts_in_edge = set(vi for e in blender_mesh.edges for vi in e.vertices)
         blender_idxs = [
@@ -517,8 +566,17 @@ def __calc_morph_tangents(normals, morph_normal_deltas, tangents):
     return morph_tangent_deltas
 
 
-def __get_uvs(blender_mesh, uv_i):
-    layer = blender_mesh.uv_layers[uv_i]
+def __get_uvs(blender_mesh, uv_i, export_settings):
+    if export_settings['emulate_asobo_optimization']: # The sim is expecting at least two tex coords, so create extras if needed
+        if len(blender_mesh.uv_layers) == 0: # Create a fake UV layer if there are none
+            layer = np.empty(len(blender_mesh.loops) * 2, dtype=np.float32)
+            layer.fill(0.0) # Blank UV layer
+        elif len(blender_mesh.uv_layers) == 1 and uv_i == 1: # If we only have one UV layer and we're trying to export the second UV layer, use the first for the second layer
+            layer = blender_mesh.uv_layers[0]
+        else:
+            layer = blender_mesh.uv_layers[uv_i]
+    else: # If we aren't optimizing the mesh OR if there are two or more UV layers, continue as normal
+        layer = blender_mesh.uv_layers[uv_i]
     uvs = np.empty(len(blender_mesh.loops) * 2, dtype=np.float32)
     layer.data.foreach_get('uv', uvs)
     uvs = uvs.reshape(len(blender_mesh.loops), 2)
@@ -531,10 +589,14 @@ def __get_uvs(blender_mesh, uv_i):
     return uvs
 
 
-def __get_colors(blender_mesh, color_i):
-    layer = blender_mesh.vertex_colors[color_i]
-    colors = np.empty(len(blender_mesh.loops) * 4, dtype=np.float32)
-    layer.data.foreach_get('color', colors)
+def __get_colors(blender_mesh, color_i, export_settings):
+    if len(blender_mesh.vertex_colors) == 0 and export_settings['emulate_asobo_optimization']: # Create a fake vertex color layer if there are none and we're optimizing the mesh since the sim is expecting a vertex color
+        colors = np.empty(len(blender_mesh.loops) * 4, dtype=np.float32)
+        colors.fill(1.0) # All white
+    else:
+        layer = blender_mesh.vertex_colors[color_i]
+        colors = np.empty(len(blender_mesh.loops) * 4, dtype=np.float32)
+        layer.data.foreach_get('color', colors)
     colors = colors.reshape(len(blender_mesh.loops), 4)
 
     # sRGB -> Linear

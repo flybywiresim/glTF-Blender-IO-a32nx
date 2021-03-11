@@ -115,6 +115,16 @@ class GlTF2Exporter:
             raise RuntimeError("glTF requested, but buffers are not finalized yet")
         return self.__gltf
 
+    def add_asobo_buffer_views(self, buffer_views): # This assumes there are no buffer views already in the glTF
+        for asobo_buffer_view in buffer_views:
+            # Add the buffer view to the glTF buffer views
+            self.__gltf.buffer_views.append(asobo_buffer_view)
+            binary_data = asobo_buffer_view.buffer.to_bytes()
+            offset = self.__buffer.add(binary_data)
+            asobo_buffer_view.buffer = 0
+            asobo_buffer_view.byte_length = len(binary_data)
+            asobo_buffer_view.byte_offset = offset
+
     def finalize_buffer(self, output_path=None, buffer_name=None, is_glb=False):
         """Finalize the glTF and write buffers."""
         if self.__finalized:
@@ -211,7 +221,7 @@ class GlTF2Exporter:
             self.__gltf.asset.extensions[key] = value
 
             # Add extension to extensions used
-            self.add_extensions_used(key)
+            self.add_extension_used(key)
 
     def __to_reference(self, property):
         """
@@ -228,15 +238,13 @@ class GlTF2Exporter:
 
         return self.__append_unique_and_get_index(gltf_list, property)
 
-    def add_extensions_required(self, extensions):
-        for extension in extensions:
-            if extension not in self.__gltf.extensions_required:
-                self.__gltf.extensions_required.append(extension)
+    def add_extension_required(self, extension):
+        if extension not in self.__gltf.extensions_required:
+            self.__gltf.extensions_required.append(extension)
 
-    def add_extensions_used(self, extensions):
-        for extension in extensions:
-            if extension not in self.__gltf.extensions_used:
-                self.__gltf.extensions_used.append(extension)
+    def add_extension_used(self, extension):
+        if extension not in self.__gltf.extensions_used:
+            self.__gltf.extensions_used.append(extension)
 
     @staticmethod
     def __append_unique_and_get_index(target: list, obj):
